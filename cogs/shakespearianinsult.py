@@ -18,7 +18,7 @@ class ShakeSpearianInsult(commands.Cog):
 
         return f"{random.choice(col1).lower()} {random.choice(col2).lower()} {random.choice(col3).lower()}."
 
-    # Register as slash command - someone who knows Python should find a way to extract this guild ID from config instead of hardcoding it.
+    # Register as slash command - pass in Guild ID so command changes propagate immediately
     @commands.slash_command(guild_ids=[Configuration.instance().GUILD_ID], description="Insult a user as if it's the year 1600")
     async def shakespeareinsult(self, interaction: Interaction, user: Member):
         await interaction.response.send_message(f"{user.mention}, you {ShakeSpearianInsult.__get_insult()}")
