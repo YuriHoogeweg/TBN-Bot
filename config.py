@@ -17,5 +17,6 @@ class Configuration:
             cls._instance.GUILD_ID: int = int(config['discord']['GUILD_ID'])
             cls._instance.CLIENT_ID: int = int(config['discord']['CLIENT_ID'])
             cls._instance.TOKEN: str = config['discord']['TOKEN']
+            cls._instance.OPENAI_KEY: str = config['openai']['KEY']
 
         return cls._instance

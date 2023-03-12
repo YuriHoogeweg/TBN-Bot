@@ -1,5 +1,6 @@
 import disnake
 from disnake.ext.commands import InteractionBot
+from cogs.sandbot import SandBot
 from cogs.shakespearianinsult import ShakeSpearianInsult
 from config import Configuration
 
@@ -14,6 +15,7 @@ bot = InteractionBot(intents=intents)
 
 # Load cogs here
 bot.add_cog(ShakeSpearianInsult(bot))
+bot.add_cog(SandBot(bot))
 
 # Register an event, the on_ready callback is fired when the bot has finished connecting.
 # See a complete list of supported events under https://docs.pycord.dev/en/master/api/events.html#discord.on_ready
