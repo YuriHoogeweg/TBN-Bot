@@ -1,6 +1,6 @@
 import random
-from discord import Member, Interaction
-from discord.ext import commands
+from disnake import Member, ApplicationCommandInteraction
+from disnake.ext import commands
 from config import Configuration
 
 
@@ -20,7 +20,7 @@ class ShakeSpearianInsult(commands.Cog):
 
     # Register as slash command - pass in Guild ID so command changes propagate immediately
     @commands.slash_command(guild_ids=[Configuration.instance().GUILD_ID], description="Insult a user as if it's the year 1600")
-    async def shakespeareinsult(self, interaction: Interaction, user: Member):
+    async def shakespeareinsult(self, interaction: ApplicationCommandInteraction, user: Member):
         await interaction.response.send_message(f"{user.mention}, you {ShakeSpearianInsult.__get_insult()}")
 
 # Called by bot.load_extension in main
