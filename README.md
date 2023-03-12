@@ -1,6 +1,8 @@
 # Configuration
 
-config.ini currently has 3 variables:  
+config.ini:
+
+## [discord]  
 
 **GUILD_ID**  
 Server ID that commands should be limited to. If this is left empty the bot registers them as global commands, which work _everywhere_ (including DMs) and take a lot longer to propagate. Set this to your own test server during development. 
@@ -11,6 +13,10 @@ Your bot user's Client ID. Currently unused.
 
 **TOKEN**  
 Your bot's authentication token. If you're not sure how to get this, you can learn how to set up a bot account [here](https://discord.com/developers/docs/getting-started#creating-an-app)
+
+## [openapi]
+**KEY**  
+Your [OpenAI API key](https://platform.openai.com/account/api-keys)
 
 # Resources
 
