@@ -1,6 +1,6 @@
 # Configuration
 
-config.ini:
+config.ini contains all settings
 
 ## [discord]  
 
@@ -17,6 +17,20 @@ Your bot's authentication token. If you're not sure how to get this, you can lea
 ## [openai]
 **KEY**  
 Your [OpenAI API key](https://platform.openai.com/account/api-keys)
+
+# Installation
+
+Python 3  
+
+Install dependencies from requirements.txt  
+```bash
+pip install -r requirements.txt  
+```
+
+run main.py
+```bash
+python3 main.py
+```
 
 # Resources
 
