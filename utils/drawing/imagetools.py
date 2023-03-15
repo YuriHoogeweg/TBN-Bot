@@ -1,10 +1,8 @@
+# Yoinked from https://github.com/mdiller/MangoByte (MIT Licence)
+
 import colorsys
 import re
-from collections import OrderedDict
-
-import colorgram
 from PIL import Image
-
 
 def rgb_to_hsv(rgb):
 	rgb = tuple(map(lambda v: v / 255.0, rgb))
@@ -103,73 +101,9 @@ def colorize_single(converter, pixel_color):
 		pixel_color.v
 	)))
 
-
-# takes in 2 image filenames and spits out a third colorized one
-# the colors from the first one are used to fill in the shape of the second one
-def colorize_image(filename1, filename2, out_filename):
-	pallete_size = 5
-
-	new_pallete = colorgram.extract(filename1, pallete_size)
-	old_pallete = colorgram.extract(filename2, pallete_size)
-
-	new_pallete = list(map(lambda c: Color(c.rgb), new_pallete))
-	old_pallete = list(map(lambda c: Color(c.rgb), old_pallete))
-
-	pallete_dict = OrderedDict()
-
-	for i in range(pallete_size):
-		pallete_dict[old_pallete[i]] = new_pallete[i]
-
-	# go edit pixels now that the dict has been built
-	image = Image.open(filename2).convert("RGBA")
-	pixels = image.load()
-
-	width, height = image.size
-
-	for j in range(height):
-		for i in range(width):
-			alpha = pixels[i, j][3]
-			result_color = colorize_single(pallete_dict, Color(pixels[i, j]))
-			pixels[i, j] = result_color.rgba_tuple(alpha)
-
-	image.save(out_filename, format="PNG")
-
-
 # pastes image 2 onto image 1, preserving alpha/transparency
 # this will close the first image that was passed in, as it is assumed that this will replace it
 def paste_image(image1, image2, x=0, y=0):
 	temp_image = Image.new("RGBA", image1.size)
 	temp_image.paste(image2, (x, y))
 	return Image.alpha_composite(image1, temp_image)
-
-# colors an image with one single color for all the pixes that are currently not transparent
-def color_image(image, color):
-	image = image.copy()
-	pixels = image.load()
-
-	for y in range(image.height):
-		for x in range(image.width):
-			if pixels[x, y][3] > 128:
-				pixels[x, y] = color
-	return image
-
-# removes semi transparent areas of an image and replaces them with either transparent or the given color
-def remove_semi_transparent(image, color):
-	image = image.copy()
-	pixels = image.load()
-
-	for y in range(image.height):
-		for x in range(image.width):
-			if pixels[x, y][3] > 128:
-				p = pixels[x, y]
-				pixels[x, y] = (p[0], p[1], p[2])
-			else:
-				pixels[x, y] = color
-	return image
-
-def outline_image(image, thickness, color):
-	background = color_image(image, color)
-	background = background.resize((image.width + (thickness * 2), image.height + (thickness * 2)))
-
-	image = paste_image(background, image, thickness, thickness)
-	return image

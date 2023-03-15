@@ -1,1 +1,0 @@
-This text file contains a prompt explaining GPT-3.5-turbo how to respond as sand-fish.
