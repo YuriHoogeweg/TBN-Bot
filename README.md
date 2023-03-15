@@ -27,3 +27,7 @@ The following are some resources that might come in handy if you want to tinker 
 3. https://pypi.org/project/stratz/
 4. https://pypi.org/project/pyopendota/
 5. https://github.com/mdiller/MangoByte
+
+# Credits
+
+Yoinked parts of the OverthrowCourage command from the [courage command](https://github.com/mdiller/MangoByte/blob/master/cogs/dotabase.py#L1307) in [MangoByte](https://github.com/mdiller/MangoByte) with some modifications to prevent having to call their API for hero/item images.
