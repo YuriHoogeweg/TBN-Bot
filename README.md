@@ -14,7 +14,7 @@ Your bot user's Client ID. Currently unused.
 **TOKEN**  
 Your bot's authentication token. If you're not sure how to get this, you can learn how to set up a bot account [here](https://discord.com/developers/docs/getting-started#creating-an-app)
 
-## [openapi]
+## [openai]
 **KEY**  
 Your [OpenAI API key](https://platform.openai.com/account/api-keys)
 
