@@ -14,6 +14,9 @@ Your bot user's Client ID. Currently unused.
 **TOKEN**  
 Your bot's authentication token. If you're not sure how to get this, you can learn how to set up a bot account [here](https://discord.com/developers/docs/getting-started#creating-an-app)
 
+**BIRTHDAYS_CHANNEL_ID**
+ID of the channel in which the bot will announce birthdays.
+
 ## [openai]
 **KEY**  
 Your [OpenAI API key](https://platform.openai.com/account/api-keys)
