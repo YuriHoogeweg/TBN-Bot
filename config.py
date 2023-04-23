@@ -18,5 +18,6 @@ class Configuration:
             cls._instance.CLIENT_ID: int = int(config['discord']['CLIENT_ID'])
             cls._instance.TOKEN: str = config['discord']['TOKEN']
             cls._instance.OPENAI_KEY: str = config['openai']['KEY']
+            cls._instance.BIRTHDAYS_CHANNEL_ID: str = int(config['discord']['BIRTHDAYS_CHANNEL_ID'])
 
         return cls._instance

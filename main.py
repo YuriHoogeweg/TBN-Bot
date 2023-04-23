@@ -1,9 +1,15 @@
 import disnake
 from disnake.ext.commands import InteractionBot
 from cogs.overthrowcourage import OverthrowCourage
+from cogs.birthdays import Birthdays
 from cogs.sandbot import SandBot
 from cogs.shakespearianinsult import ShakeSpearianInsult
 from config import Configuration
+import openai 
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+
+# Set the openai api key
+openai.api_key = Configuration.instance().OPENAI_KEY
 
 # Set intents for the bot here - intents info: https://discord.com/developers/docs/topics/gateway#gateway-intents
 intents = disnake.Intents.default()
@@ -18,6 +24,7 @@ bot = InteractionBot(intents=intents)
 bot.add_cog(ShakeSpearianInsult(bot))
 bot.add_cog(OverthrowCourage(bot))
 bot.add_cog(SandBot(bot))
+bot.add_cog(Birthdays(bot))
 
 # Register an event, the on_ready callback is fired when the bot has finished connecting.
 # See a complete list of supported events under https://docs.pycord.dev/en/master/api/events.html#discord.on_ready
@@ -27,6 +34,10 @@ async def on_ready():
 
     # Sync our registered slash commands
     await bot._sync_application_commands()
+
+    scheduler = AsyncIOScheduler()
+    scheduler.add_job(bot.get_cog('Birthdays').notify_birthdays, 'cron', hour = 8, minute = 0, second = 0, timezone = 'Europe/London', id = 'notify_birthdays')
+    scheduler.start()
 
 # Run the client and pass it our bot's authentication token
 bot.run(Configuration.instance().TOKEN)

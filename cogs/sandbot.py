@@ -8,8 +8,7 @@ import openai
 
 
 class SandBot(commands.Cog):
-    def __init__(self, bot: commands.Bot):
-        openai.api_key = Configuration.instance().OPENAI_KEY
+    def __init__(self, bot: commands.Bot):        
         self.bot = bot
 
     async def __get_response(self, username: str, message: str):

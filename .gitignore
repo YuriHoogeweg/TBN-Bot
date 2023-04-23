@@ -161,3 +161,4 @@ cython_debug/
 
 config.ini
 resources/dota/panorama
+resources/tbn-bot-database.db
