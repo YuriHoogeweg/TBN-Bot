@@ -19,5 +19,7 @@ class Configuration:
             cls._instance.TOKEN: str = config['discord']['TOKEN']
             cls._instance.OPENAI_KEY: str = config['openai']['KEY']
             cls._instance.BIRTHDAYS_CHANNEL_ID: str = int(config['discord']['BIRTHDAYS_CHANNEL_ID'])
+            cls._instance.DOTABUFF_EMOJI: str = config['discord']['DOTABUFF_EMOJI']
+            cls._instance.TWITCH_EMOJI: str = config['discord']['TWITCH_EMOJI']
 
         return cls._instance
