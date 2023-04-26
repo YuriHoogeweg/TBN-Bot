@@ -43,6 +43,10 @@ class BerlinMajor(commands.Cog):
                       emoji='📅')]
 
         stream_buttons = [
+            ui.Button(label='Squad Stream',
+                      row=1,
+                      url='https://www.twitch.tv/esl_dota2/squad',
+                      emoji=twitch_emoji),
             ui.Button(label='Main Stream',
                       row=1,
                       url='https://www.twitch.tv/esl_dota2',
