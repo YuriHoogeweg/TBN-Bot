@@ -33,6 +33,10 @@ class BerlinMajor(commands.Cog):
                         inline=False)
 
         liquipedia_buttons = [
+            ui.Button(label='Group Stage Standings',
+                      row=0,
+                      url='https://liquipedia.net/dota2/ESL_One/Berlin_Major/2023/Group_Stage#Group_A',
+                      emoji='📋'),
             ui.Button(label='Group Stage Matches',
                       row=0,
                       url='https://liquipedia.net/dota2/ESL_One/Berlin_Major/2023/Group_Stage#Matches',
