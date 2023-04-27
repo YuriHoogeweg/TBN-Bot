@@ -1,6 +1,7 @@
 from datetime import datetime
 import os
 import random
+import time
 from disnake import Member, ApplicationCommandInteraction
 from disnake.ext import commands
 from config import Configuration
@@ -36,27 +37,38 @@ class SandBot(commands.Cog):
 
         assistant_message_3 = "u computer ppl think ur sooo cool with ur word deleting app"
 
-        completion = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_message_1},
-                {"role": "assistant", "content": assistant_message_1},
-                {"role": "user", "content": user_message_2},
-                {"role": "assistant", "content": assistant_message_2},
-                {"role": "user", "content": user_message_3},
-                {"role": "assistant", "content": assistant_message_3},
-                {"role": "user", "content": f"Oh wow, you're doing great so far! Let's continue imitating sand-fish :). {message}"},
-            ]
-        )
+        response = ""
+        
+        for attempt in range(1, 6):
+            try:
+                print(f"Sand Bot Attempt #{attempt}...")
+                completion = openai.ChatCompletion.create(
+                    model="gpt-3.5-turbo",
+                    messages=[
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user", "content": user_message_1},
+                        {"role": "assistant", "content": assistant_message_1},
+                        {"role": "user", "content": user_message_2},
+                        {"role": "assistant", "content": assistant_message_2},
+                        {"role": "user", "content": user_message_3},
+                        {"role": "assistant", "content": assistant_message_3},
+                        {"role": "user", "content": f"Oh wow, you're doing great so far! Let's continue imitating sand-fish :). {message}"},
+                    ]
+                )
 
-        response = completion.choices[0].message.content.replace("\n", "")
+                response = completion.choices[0].message.content.replace("\n", "")
+                break
+            except:
+                response = "OpenAI API call failed. soz ;("
+                print(f"Sand Bot Failed.")
+                time.sleep(10)
+                continue
 
         log_message = f"{datetime.now().strftime('%d/%m/%Y %H:%M:%S')}\n\tInput: {message}\n\tResponse: {response}\n"
         print(log_message)
 
         # Log to file
-        with open(f"log.txt", "a") as f:
+        with open(f"log.txt", "a", encoding="UTF-8") as f:
             f.write(log_message)            
 
         return response
