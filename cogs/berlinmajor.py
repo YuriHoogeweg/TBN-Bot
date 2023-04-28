@@ -13,7 +13,7 @@ class BerlinMajor(commands.Cog):
         embed = Embed(
             title='ESL One Berlin Major',
             type='rich',
-            color=0xe3088b
+            color=0xffff09
         )
 
         dotabuff_emoji = Configuration.instance().DOTABUFF_EMOJI
