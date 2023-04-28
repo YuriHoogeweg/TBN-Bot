@@ -70,6 +70,9 @@ class Birthdays(commands.Cog):
             .filter(extract('month', TbnMember.birthday) == datetime.now().month)\
             .filter(extract('day', TbnMember.birthday) == datetime.now().day)\
             .all()
+            
+        if len(birthday_bois) < 1: 
+            return
 
         user_message_1 = f"""You are an announcer for birthdays of members of a Discord community called 'The Biscuit Network' or TBN for short.  
         The announcement should contain a short paragraph for each user referencing by their ID. 
