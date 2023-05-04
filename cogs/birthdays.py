@@ -1,9 +1,9 @@
 import time
 from disnake import Member, ApplicationCommandInteraction
-from disnake.ext import commands
+from disnake.ext import commands, tasks
 from sqlalchemy import extract
 from config import Configuration
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone, time
 from database import database_session, TbnMember
 import openai
 import os
@@ -17,6 +17,10 @@ class Birthdays(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.db_session = database_session()
+        self.notify_birthdays.start()
+
+    def cog_unload(self):
+        self.notify_birthdays.cancel()
 
     # Register as slash command - pass in Guild ID so command changes propagate immediately
     @commands.slash_command(guild_ids=[Configuration.instance().GUILD_ID], name="setbirthday", description="Set your birthday")
@@ -65,6 +69,7 @@ class Birthdays(commands.Cog):
         birthday_boi = self.db_session.query(TbnMember).filter(TbnMember.id == interaction.author.id).first()
         await interaction.response.send_message(f"{interaction.author.mention}, your birthday is registered as {birthday_boi.birthday.strftime(birthday_output_format)}", ephemeral=True)
 
+    @tasks.loop(time=time(hour=7, minute=0, tzinfo=timezone.utc))
     async def notify_birthdays(self):
         birthday_bois = self.db_session.query(TbnMember)\
             .filter(extract('month', TbnMember.birthday) == datetime.now().month)\

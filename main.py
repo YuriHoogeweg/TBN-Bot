@@ -8,7 +8,6 @@ from cogs.shakespearianinsult import ShakeSpearianInsult
 from cogs.formulaone import FormulaOne
 from config import Configuration
 import openai 
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 # Set the openai api key
 openai.api_key = Configuration.instance().OPENAI_KEY
