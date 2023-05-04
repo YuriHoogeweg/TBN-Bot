@@ -39,9 +39,5 @@ async def on_ready():
     # Sync our registered slash commands
     await bot._sync_application_commands()
 
-    scheduler = AsyncIOScheduler()
-    scheduler.add_job(bot.get_cog('Birthdays').notify_birthdays, 'cron', hour = 8, minute = 0, second = 0, timezone = 'Europe/London', id = 'notify_birthdays')
-    scheduler.start()
-
 # Run the client and pass it our bot's authentication token
 bot.run(Configuration.instance().TOKEN)
