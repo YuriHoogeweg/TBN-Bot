@@ -68,6 +68,13 @@ class Birthdays(commands.Cog):
     async def show_birthday(self, interaction: ApplicationCommandInteraction):
         birthday_boi = self.db_session.query(TbnMember).filter(TbnMember.id == interaction.author.id).first()
         await interaction.response.send_message(f"{interaction.author.mention}, your birthday is registered as {birthday_boi.birthday.strftime(birthday_output_format)}", ephemeral=True)
+    
+    @commands.slash_command(guild_ids=[Configuration.instance().GUILD_ID], name="announcebirthdays", description="Trigger the birthday announcement.")
+    @commands.default_member_permissions(manage_guild=True)
+    async def trigger_birthdays_announcement(self, interaction: ApplicationCommandInteraction):
+        await interaction.response.defer()        
+        await self.notify_birthdays()        
+        await interaction.delete_original_response()
 
     @tasks.loop(time=time(hour=7, minute=0, tzinfo=timezone.utc))
     async def notify_birthdays(self):
