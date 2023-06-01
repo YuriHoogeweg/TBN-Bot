@@ -1,6 +1,7 @@
 import disnake
 from disnake.ext.commands import InteractionBot
 from cogs.berlinmajor import BerlinMajor
+from cogs.corybot import CoryBot
 from cogs.overthrowcourage import OverthrowCourage
 from cogs.birthdays import Birthdays
 from cogs.sandbot import SandBot
@@ -28,6 +29,7 @@ bot.add_cog(SandBot(bot))
 bot.add_cog(Birthdays(bot))
 bot.add_cog(BerlinMajor(bot))
 bot.add_cog(FormulaOne(bot))
+bot.add_cog(CoryBot(bot))
 
 # Register an event, the on_ready callback is fired when the bot has finished connecting.
 # See a complete list of supported events under https://docs.pycord.dev/en/master/api/events.html#discord.on_ready

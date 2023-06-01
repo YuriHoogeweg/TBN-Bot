@@ -2,6 +2,7 @@ import time
 from disnake import Member, ApplicationCommandInteraction
 from disnake.ext import commands, tasks
 from sqlalchemy import extract
+from cogs.shared.chatcompletion_cog import ChatCompletionCog
 from config import Configuration
 from datetime import datetime, timedelta, timezone, time
 from database import database_session, TbnMember
@@ -13,11 +14,29 @@ from database.tbnbotdatabase import TbnMemberAudit
 birthday_input_format = '%d/%m/%Y'
 birthday_output_format = '%d %B'
 
-class Birthdays(commands.Cog):
+class Birthdays(ChatCompletionCog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.db_session = database_session()
         self.notify_birthdays.start()
+
+        system_message = """You are an announcer for birthdays of members of a Discord community called 'The Biscuit Network' or TBN for short. You will write messages to announce birthdays in an announcements channel."""
+
+        user_message_1 = f"""Hi. I'd like you to write a birthday announcement for a Discord community called 'The Biscuit Network'. 
+        The announcement should contain a short paragraph for each user referencing them by their ID. 
+        For example, for a user with ID 186222231125360641 you could say: 
+        "Hello gang! It's one of our esteemed members' birthday today! 
+        Please congratulate <@!186222231125360641> on their birthday! <@!186222231125360641>"
+        Followed by a short message wishing them a happy birthday and expressing how much they mean to the community. This message should be funny, complimentary and flirtatious.
+        Include many emoji relevant to birthday celebrations such as 🎂, 🥳, 🎉, ❤. Make sure to format it neatly by starting a new paragraph for each user. 
+        If there are multiple users with birthdays on the same day, make sure to mention all of them in the announcement, but each of their paragraphs should be unique.
+        Be creative in your response, but make sure to NEVER mention a User ID unless it's surrounded by <@! and > in the form of a Discord mention such as <@!186222231125360641>! 
+        Respond "Ok." if you understand.
+        """
+
+        assistant_message_1 = "Ok."
+
+        self.set_message_context(system_message, [user_message_1], [assistant_message_1])
 
     def cog_unload(self):
         self.notify_birthdays.cancel()
@@ -86,42 +105,8 @@ class Birthdays(commands.Cog):
         if len(birthday_bois) < 1: 
             return
 
-        user_message_1 = f"""You are an announcer for birthdays of members of a Discord community called 'The Biscuit Network' or TBN for short.  
-        The announcement should contain a short paragraph for each user referencing by their ID. 
-        For example, for a user with ID 186222231125360641 you could say: 
-        "Hello gang! It's one of our esteemed members' birthday today! 
-        Please congratulate <@!186222231125360641> on their birthday! <@!186222231125360641>"
-        Followed by a short message wishing them a happy birthday and expressing how much they mean to the community. This message should be funny, complimentary and flirtatious.
-        Include many emoji relevant to birthday celebrations such as 🎂, 🥳, 🎉, ❤. Make sure to format it neatly by starting a new paragraph for each user. 
-        If there are multiple users with birthdays on the same day, make sure to mention all of them in the announcement, but each of their messages should be unique.
-        Be creative in your response, but make sure to NEVER mention a User ID unless it's surrounded by <@! and > in the form of a Discord mention such as <@!186222231125360641>! 
-        Respond "Ok." to confirm you understand.
-        """
-
-        assistant_message_1 = "Ok."
-
-        user_message_2 = F"There are {len(birthday_bois)} birthdays today, their User IDs are {', '.join([str(member.id) for member in birthday_bois])}. Please write the announcement."
-
-        announcement = ""
-
-        for attempt in range(1, 6):
-            try:
-                print(f"Attempt #{attempt}...")
-                completion = completion = openai.ChatCompletion.create(
-                    model="gpt-3.5-turbo",
-                    messages=[
-                        {"role": "user", "content": user_message_1},
-                        {"role": "assistant", "content": assistant_message_1},
-                        {"role": "user", "content": user_message_2}
-                    ]
-                )
-
-                announcement = completion.choices[0].message.content
-                break
-            except:
-                print(f"Failed.")
-                time.sleep(5)
-                continue
+        message = f"There are {len(birthday_bois)} birthdays today, their User IDs are {', '.join([str(member.id) for member in birthday_bois])}. Please write the announcement."
+        announcement = await self.get_response(message)
 
         if announcement == "":
             announcement = (
