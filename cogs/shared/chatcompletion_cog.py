@@ -4,6 +4,7 @@ import time
 from typing import List
 from disnake.ext import commands
 import openai
+import copy
 
 
 class ChatCompletionCog(commands.Cog):
@@ -21,15 +22,17 @@ class ChatCompletionCog(commands.Cog):
             if i < len(ast_msg):
                 messages.append({"role": "assistant", "content": ast_msg[i]})
 
-        self.messages = messages
+        self.messagecontext = messages
 
-    async def get_response(self, message: str, placeholder_strings: dict[str, str] = []):        
+    async def get_response(self, message: str, placeholder_strings: dict[str, str] = []):  
+        messages = copy.deepcopy(self.messagecontext)
+
         if placeholder_strings is not None and len(placeholder_strings) > 0:
-            for msg, (placeholder, replacement) in product(self.messages, placeholder_strings.items()):
+            for msg, (placeholder, replacement) in product(messages, placeholder_strings.items()):
                 msg['content'] = msg['content'].replace(placeholder, replacement)
 
         response = ""
-        messages = self.messages.copy()
+        
         messages.append({"role": "user", "content": message})
 
         for attempt in range(1, 3):
