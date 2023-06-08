@@ -55,7 +55,7 @@ class SandBot(ChatCompletionCog):
         msg = f"Oh wow, you're doing great so far! Let's continue imitating sand-fish :). {message}"
         response = await self.get_response(msg, placeholder_replacements)
 
-        await interaction.followup.send(f"{interaction.author.mention}: {message}\nsand-fish: {response}")
+        await interaction.followup.send(f"{interaction.author.mention}: {message}\n\nsand-fish: {response}")
 
 # Called by bot.load_extension in main
 

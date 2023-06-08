@@ -45,7 +45,7 @@ class CoryBot(ChatCompletionCog):
         msg = f"Oh wow, you're doing a great job so far! Let's continue :). {message}"
         response = await self.get_response(msg, placeholder_replacements)
 
-        await interaction.followup.send(f"{interaction.author.mention}: {message}\nCory: {response}")
+        await interaction.followup.send(f"{interaction.author.mention}: {message}\n\nCory: {response}")
 
 # Called by bot.load_extension in main
 def setup(bot: commands.Bot):
