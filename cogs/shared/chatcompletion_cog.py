@@ -48,6 +48,7 @@ class ChatCompletionCog(commands.Cog):
                 response = completion.choices[0].message.content
                 break
             except:
+                logging.exception()
                 response = "OpenAI API call failed."                  
                 time.sleep(10)
                 continue
