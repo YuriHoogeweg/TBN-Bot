@@ -1,3 +1,8 @@
+import logging
+
+# Configure logging to file log.txt
+logging.basicConfig(filename='log.txt', encoding='utf-8', filemode='a', level=logging.INFO, format='%(asctime)s:%(levelname)s:%(name)s: %(message)s')
+
 import disnake
 from disnake.ext.commands import InteractionBot
 from cogs.berlinmajor import BerlinMajor
@@ -8,7 +13,7 @@ from cogs.sandbot import SandBot
 from cogs.shakespearianinsult import ShakeSpearianInsult
 from cogs.formulaone import FormulaOne
 from config import Configuration
-import openai 
+import openai
 
 # Set the openai api key
 openai.api_key = Configuration.instance().OPENAI_KEY
@@ -33,6 +38,8 @@ bot.add_cog(CoryBot(bot))
 
 # Register an event, the on_ready callback is fired when the bot has finished connecting.
 # See a complete list of supported events under https://docs.pycord.dev/en/master/api/events.html#discord.on_ready
+
+
 @bot.event
 async def on_ready():
     print(f'Logged in as {bot.user}')
