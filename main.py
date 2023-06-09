@@ -48,4 +48,4 @@ async def on_ready():
     await bot._sync_application_commands()
 
 # Run the client and pass it our bot's authentication token
-bot.run(Configuration.instance().TOKEN)
+bot.run(Configuration.instance().TOKEN, reconnect=True)

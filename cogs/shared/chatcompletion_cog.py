@@ -7,7 +7,7 @@ from disnake.ext import commands
 import openai
 import copy
 
-from config import Configuration
+from retry import retry
 
 
 class ChatCompletionCog(commands.Cog):
@@ -27,7 +27,7 @@ class ChatCompletionCog(commands.Cog):
 
         self.messagecontext = messages
 
-    async def get_response(self, message: str, placeholder_strings: dict[str, str] = []):                  
+    async def get_response(self, message: str, placeholder_strings: dict[str, str] = []) -> str:                  
         messages = copy.deepcopy(self.messagecontext)
 
         if placeholder_strings is not None and len(placeholder_strings) > 0:
@@ -36,24 +36,18 @@ class ChatCompletionCog(commands.Cog):
 
         response = ""        
         messages.append({"role": "user", "content": message})
-    
-        for attempt in range(1, 3):
-            logging.info(f"Attempt {attempt} of 3")
-            try:                
-                completion = openai.ChatCompletion.create(
-                    model="gpt-3.5-turbo",
-                    messages=messages
-                )
 
-                response = completion.choices[0].message.content
-                break
-            except:
-                logging.exception('')
-                response = "OpenAI API call failed."                  
-                time.sleep(10)
-                continue
+        response = self.__call_openai(messages)
 
-        log_message = f"Input: {message}\n\tResponse: {response}\n"
-        logging.info(log_message)
+        logging.info(f"Input: {message}\n\tResponse: {response}\n")        
         
         return response    
+    
+    @retry(tries=3, delay=5, backoff=5, logger=logging.getLogger(__name__))
+    def __call_openai(self, messages) -> str:
+        completion = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=messages
+        )
+
+        return completion.choices[0].message.content
