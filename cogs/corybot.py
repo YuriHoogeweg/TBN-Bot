@@ -48,6 +48,25 @@ class CoryBot(ChatCompletionCog):
 
         await interaction.followup.send(f"{interaction.author.mention}: {message}\n\nCory: {response}")
 
+    @commands.slash_command(guild_ids=[Configuration.instance().GUILD_ID])
+    async def corys_thoughts(self, interaction: ApplicationCommandInteraction, num_message_context: int = commands.param(ge=1, le=10, default=5)):
+        """
+        Get cory's thoughts on the conversation.
+
+        Parameters
+        ----------
+        num_message_context: number of messages to include in cory's thoughts.        
+        """
+
+        await interaction.response.defer()
+        
+        messages = await interaction.channel.history(limit=num_message_context).flatten()
+        conversation = str.join('\n', [f'{interaction.author.nick or interaction.author.name}: {message.content}' for message in messages])
+        placeholder_replacements = {'%username%': str(interaction.author.nick or interaction.author.name)}
+        response = await self.get_response(f"Oh wow, you're doing a great job so far! Let's continue :). Please weigh in on the following conversation with a single message response: \n{conversation}", placeholder_replacements)
+
+        await interaction.followup.send(f"cory: {response.removeprefix('cory:').strip()}")
+
 # Called by bot.load_extension in main
 def setup(bot: commands.Bot):
     bot.add_cog(CoryBot(bot))

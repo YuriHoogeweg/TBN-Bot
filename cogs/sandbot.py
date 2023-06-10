@@ -50,15 +50,32 @@ class SandBot(ChatCompletionCog):
 
         await interaction.response.defer()
 
-        placeholder_replacements = {'%username%': str(
-            interaction.author.nick or interaction.author.name)}
+        placeholder_replacements = {'%username%': str(interaction.author.nick or interaction.author.name)}
         msg = f"Oh wow, you're doing great so far! Let's continue imitating sand-fish :). {message}"
-        response = await self.get_response(msg, placeholder_replacements)
+        response = await self.get_response(msg, placeholder_replacements)        
 
         await interaction.followup.send(f"{interaction.author.mention}: {message}\n\nsand-fish: {response}")
 
+    @commands.slash_command(guild_ids=[Configuration.instance().GUILD_ID])
+    async def sands_thoughts(self, interaction: ApplicationCommandInteraction, num_message_context: int = commands.param(ge=1, le=10, default=5)):
+        """
+        Get sand's thoughts on the conversation.
+
+        Parameters
+        ----------
+        num_message_context: number of messages to include in sand's thoughts.        
+        """
+
+        await interaction.response.defer()
+        
+        messages = await interaction.channel.history(limit=num_message_context).flatten()
+        conversation = str.join('\n', [f'{interaction.author.nick or interaction.author.name}: {message.content}' for message in messages])
+        placeholder_replacements = {'%username%': str(interaction.author.nick or interaction.author.name)}
+        response = await self.get_response(f"Oh wow, you're doing great so far! Let's continue imitating sand-fish :). Please weigh in on the following conversation with a single message response: \n{conversation}", placeholder_replacements)
+
+        await interaction.followup.send(f"sand-fish: {response.removeprefix('sand-fish:').strip()}")
+
+
 # Called by bot.load_extension in main
-
-
 def setup(bot: commands.Bot):
     bot.add_cog(SandBot(bot))
