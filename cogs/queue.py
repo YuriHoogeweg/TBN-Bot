@@ -1,4 +1,4 @@
-from disnake import Member, ApplicationCommandInteraction, VoiceState
+from disnake import ChannelType, Member, ApplicationCommandInteraction, VoiceState
 from disnake.ext import commands
 from disnake.abc import GuildChannel
 from config import Configuration
@@ -37,7 +37,7 @@ class Queue(commands.Cog):
             return await inter.followup.send("There is no queue for this channel.")
 
         queue = self.channel_queues[channel.id]
-        queue = dict({1078760423714730016: datetime.now(), 986670041460252723: datetime.now() + timedelta(minutes=-5), 516721359875735560: datetime.now() + timedelta(days=-5)})
+        #queue = dict({1078760423714730016: datetime.now(), 986670041460252723: datetime.now() + timedelta(minutes=-5), 516721359875735560: datetime.now() + timedelta(days=-5)})
 
         now = datetime.now()
         queue_positions = "".join(
@@ -56,6 +56,16 @@ class Queue(commands.Cog):
 
         channel = self.channel_queues.setdefault(after.channel.id, dict())
         channel.setdefault(member.id, datetime.now())
+
+    @commands.Cog.listener()
+    async def on_ready(self):
+        # initialise channel queues for all voice channels that already have members sitting in them
+        for guild in self.bot.guilds:
+            for channel in guild.channels:
+                if channel.type == ChannelType.voice:
+                    self.channel_queues.setdefault(channel.id, dict())
+                    for voice_state in channel.voice_states:
+                        self.channel_queues[channel.id].setdefault(voice_state, datetime.now())
 
     def pretty_date(self, now: datetime, time=False):
         if type(time) is int:
