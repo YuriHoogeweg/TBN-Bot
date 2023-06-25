@@ -1,6 +1,6 @@
 import logging
 
-from cogs.queue import Queue
+from cogs.jointime import JoinTimeCog
 
 # Configure logging to file log.txt
 logging.basicConfig(filename='log.txt', encoding='utf-8', filemode='a', level=logging.INFO, format='%(asctime)s:%(levelname)s:%(name)s: %(message)s')
@@ -37,7 +37,7 @@ bot.add_cog(Birthdays(bot))
 bot.add_cog(BerlinMajor(bot))
 bot.add_cog(FormulaOne(bot))
 bot.add_cog(CoryBot(bot))
-bot.add_cog(Queue(bot))
+bot.add_cog(JoinTimeCog(bot))
 
 # Register an event, the on_ready callback is fired when the bot has finished connecting.
 # See a complete list of supported events under https://docs.pycord.dev/en/master/api/events.html#discord.on_ready

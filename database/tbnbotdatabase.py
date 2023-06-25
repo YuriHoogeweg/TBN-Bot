@@ -22,7 +22,7 @@ class TbnMember(Base):
     created_at = Column(DateTime)
 
 class TbnMemberAudit(Base):
-    __tablename__ = "tbn_member_audit"
+    __tablename__ = 'tbn_member_audit'
 
     def __init__(self, member: TbnMember):
         self.member_id = member.id
@@ -34,8 +34,19 @@ class TbnMemberAudit(Base):
     birthday = Column(Date)
     created_at = Column(DateTime)    
 
+class JoinTime(Base):
+    __tablename__ = 'join_time'
+
+    def __init__(self, member_id: int, channel_id: int, join_time: datetime):
+        self.member_id = member_id
+        self.channel_id = channel_id
+        self.join_time = join_time
+
+    member_id = Column(Integer, primary_key=True)
+    channel_id = Column(Integer)
+    join_time = Column(DateTime)
+
 def database_session() -> Session:
     engine = create_engine('sqlite:///' + database_path.as_posix())
     Base.metadata.create_all(engine)
     return Session(engine)
-    
