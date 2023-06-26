@@ -66,7 +66,7 @@ class Major(commands.Cog):
                       row=1,
                       url='https://www.twitch.tv/EpulzeEN',
                       emoji=twitch_emoji),
-            ui.Button(label='EpulzeEN',
+            ui.Button(label='EpulzeEN2',
                       row=1,
                       url='https://www.twitch.tv/EpulzeEN2',
                       emoji=twitch_emoji),
