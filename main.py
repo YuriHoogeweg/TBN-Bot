@@ -1,19 +1,18 @@
 import logging
 
-from cogs.jointime import JoinTimeCog
-
 # Configure logging to file log.txt
 logging.basicConfig(filename='log.txt', encoding='utf-8', filemode='a', level=logging.INFO, format='%(asctime)s:%(levelname)s:%(name)s: %(message)s')
 
 import disnake
 from disnake.ext.commands import InteractionBot
-from cogs.berlinmajor import BerlinMajor
 from cogs.corybot import CoryBot
 from cogs.overthrowcourage import OverthrowCourage
 from cogs.birthdays import Birthdays
 from cogs.sandbot import SandBot
 from cogs.shakespearianinsult import ShakeSpearianInsult
 from cogs.formulaone import FormulaOne
+from cogs.jointime import JoinTimeCog
+from cogs.major import Major
 from config import Configuration
 import openai
 
@@ -34,7 +33,7 @@ bot.add_cog(ShakeSpearianInsult(bot))
 bot.add_cog(OverthrowCourage(bot))
 bot.add_cog(SandBot(bot))
 bot.add_cog(Birthdays(bot))
-bot.add_cog(BerlinMajor(bot))
+bot.add_cog(Major(bot))
 bot.add_cog(FormulaOne(bot))
 bot.add_cog(CoryBot(bot))
 bot.add_cog(JoinTimeCog(bot))
