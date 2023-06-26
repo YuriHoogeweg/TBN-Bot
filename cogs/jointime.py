@@ -55,7 +55,8 @@ class JoinTimeCog(commands.Cog):
         if member.bot:
             return
 
-        await self.move_user(member.id, after.channel.id)
+        to_channel_id = after.channel.id if after.channel is not None else None
+        await self.move_user(member.id, to_channel_id)
 
     async def move_user(self, member_id: int, to_channel_id: int):
         # If user left a channel, remove their position in that channel's jointimes.        
@@ -64,11 +65,13 @@ class JoinTimeCog(commands.Cog):
         
         if prev_join_time != None and prev_join_time.channel_id != to_channel_id:
             self.db_session.delete(prev_join_time)
-            self.db_session.add(JoinTime(member_id, to_channel_id, datetime.now()))
+            
+            if to_channel_id != None:
+                self.db_session.add(JoinTime(member_id, to_channel_id, datetime.now()))
         elif prev_join_time == None:
             self.db_session.add(JoinTime(member_id, to_channel_id, datetime.now()))
         
-        self.db_session.commit()        
+        self.db_session.commit()    
 
     @commands.Cog.listener()
     async def on_ready(self):
