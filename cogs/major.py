@@ -23,10 +23,10 @@ class Major(commands.Cog):
         liquipedia_emoji = Configuration.instance().LIQUIPEDIA_EMOJI
 
         major_start_time = datetime.datetime.utcfromtimestamp(1688004000)
-        time_until_major = humanize.precisedelta(major_start_time - datetime.datetime.utcnow(), minimum_unit='minutes')
+        time_until_major = f'(in {humanize.precisedelta(major_start_time - datetime.datetime.utcnow(), minimum_unit="minutes")}' if major_start_time > datetime.datetime.utcnow() else ''
 
         embed.add_field(name='Group stage',
-                        value=f'June 29th to July 3rd (in {time_until_major})',
+                        value=f'June 29th to July 3rd {time_until_major}',
                         inline=False)
         embed.add_field(name='Playoffs',
                         value='July 5th to July 9th',
