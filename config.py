@@ -25,4 +25,5 @@ class Configuration:
             cls._instance.DOTABUFF_EMOJI: str = config['discord']['DOTABUFF_EMOJI']
             cls._instance.TWITCH_EMOJI: str = config['discord']['TWITCH_EMOJI']
             cls._instance.LIQUIPEDIA_EMOJI: str = config['discord']['LIQUIPEDIA_EMOJI']
+            cls._instance.YOUTUBE_EMOJI: str = config['discord']['YOUTUBE_EMOJI']
         return cls._instance

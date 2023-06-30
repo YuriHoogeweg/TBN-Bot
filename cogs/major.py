@@ -21,6 +21,7 @@ class Major(commands.Cog):
         dotabuff_emoji = Configuration.instance().DOTABUFF_EMOJI
         twitch_emoji = Configuration.instance().TWITCH_EMOJI
         liquipedia_emoji = Configuration.instance().LIQUIPEDIA_EMOJI
+        youtube_emoji = Configuration.instance().YOUTUBE_EMOJI
 
         major_start_time = datetime.datetime.utcfromtimestamp(1688004000)
         time_until_major = f'(in {humanize.precisedelta(major_start_time - datetime.datetime.utcnow(), minimum_unit="minutes")}' if major_start_time > datetime.datetime.utcnow() else ''
@@ -36,7 +37,7 @@ class Major(commands.Cog):
         #                 inline=False)
 
         liquipedia_buttons = [
-            ui.Button(label='Liquipedia Page', 
+            ui.Button(label='Liquipedia Page',
                       row=0,
                       url='https://liquipedia.net/dota2/Bali_Major/2023',
                       emoji=liquipedia_emoji),
@@ -57,45 +58,51 @@ class Major(commands.Cog):
                       url='https://liquipedia.net/dota2/Bali_Major/2023#Playoffs',
                       emoji=liquipedia_emoji)]
 
-        stream_buttons = [
-            ui.Button(label='EpulzeGaming',
+        youtube_buttons = [
+            ui.Button(label='YouTube streams',
                       row=1,
+                      url='https://www.youtube.com/@EpulzeGaming/streams',
+                      emoji=youtube_emoji)]
+
+        twitch_buttons = [
+            ui.Button(label='EpulzeGaming',
+                      row=2,
                       url='https://www.twitch.tv/epulzegaming',
                       emoji=twitch_emoji),
             ui.Button(label='EpulzeEN',
-                      row=1,
+                      row=2,
                       url='https://www.twitch.tv/EpulzeEN',
                       emoji=twitch_emoji),
             ui.Button(label='EpulzeEN2',
-                      row=1,
+                      row=2,
                       url='https://www.twitch.tv/EpulzeEN2',
                       emoji=twitch_emoji),
             ui.Button(label='EpulzeEN3',
-                      row=1,
+                      row=2,
                       url='https://www.twitch.tv/EpulzeEN3',
                       emoji=twitch_emoji),
             ui.Button(label='EpulzeEN4',
-                      row=1,
+                      row=2,
                       url='https://www.twitch.tv/EpulzeEN4',
                       emoji=twitch_emoji)]
 
         stats_buttons = [
             ui.Button(label='Dotabuff Page',
-                      row=2,
+                      row=3,
                       url='https://www.dotabuff.com/esports/leagues/15438-the-bali-major',
                       emoji=dotabuff_emoji),
             ui.Button(label='Picks and Bans',
-                      row=2,
+                      row=3,
                       url='https://www.dotabuff.com/esports/leagues/15438-the-bali-major/picks',
                       emoji=dotabuff_emoji),
             ui.Button(label='Drafts',
-                      row=2,
+                      row=3,
                       url='https://www.dotabuff.com/esports/leagues/15438-the-bali-major/drafts',
                       emoji=dotabuff_emoji)]
 
         embed.set_thumbnail(url='https://i.imgur.com/kSwVOrR.png')
 
-        await interaction.response.send_message(embed=embed, components=[liquipedia_buttons, stream_buttons, stats_buttons])
+        await interaction.response.send_message(embed=embed, components=[liquipedia_buttons, youtube_buttons, twitch_buttons, stats_buttons])
 
 # Called by bot.load_extension in main
 
