@@ -15,7 +15,7 @@ class Configuration:
 
             # Read config variables from config.ini
             config = ConfigParser()
-            config.read('devconfig.ini')
+            config.read('config.ini')
             cls._instance.GUILD_ID: int = int(config['discord']['GUILD_ID'])
             cls._instance.CLIENT_ID: int = int(config['discord']['CLIENT_ID'])
             cls._instance.TOKEN: str = config['discord']['TOKEN']
