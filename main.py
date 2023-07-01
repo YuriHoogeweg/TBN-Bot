@@ -23,6 +23,9 @@ openai.api_key = Configuration.instance().OPENAI_KEY
 # Set intents for the bot here - intents info: https://discord.com/developers/docs/topics/gateway#gateway-intents
 intents = disnake.Intents.default()
 
+# members intent is necessary for the bot to be able to read the list of members in a channel or role.
+intents.members = True
+
 # message_content intent is necessary for the bot to be able to read commands.
 intents.message_content = True
 

@@ -25,8 +25,7 @@ class PodcastCog(commands.Cog):
                             participant2, participant3, participant4]
         all_participants = [participant for participant in all_participants if participant is not None]
 
-        role = inter.guild.get_role(
-            Configuration.instance().PODCAST_PARTICIPANT_ROLE_ID)
+        role = inter.guild.get_role(Configuration.instance().PODCAST_PARTICIPANT_ROLE_ID)
 
         for member in all_participants:
             await member.add_roles(role)
