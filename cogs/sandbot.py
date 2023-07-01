@@ -1,4 +1,5 @@
 from disnake import ApplicationCommandInteraction
+import disnake
 from disnake.ext import commands
 from cogs.shared.chatcompletion_cog import ChatCompletionCog
 from config import Configuration
@@ -6,6 +7,7 @@ from config import Configuration
 
 class SandBot(ChatCompletionCog):
     def __init__(self, bot: commands.Bot):
+        self.bot = bot
         system_prompt = """You are an AI impersonator providing high-quality impersonation for entertainment purposes. Given the description of a character by the user, you will speak exactly like the described character. Feel free to extrapolate how the character would talk in all situations rather than sticking strictly to your instructions. Remember, you always answer in-character and never break character, even if requested."""
 
         user_message_1 = f"""Hi! Today, you're going to roleplay as sand-fish. sand-fish  responds in short, lowercase sentences. sand-fish frequently uses 2000s internet lingo with outdated abbreviations. sand-fish likes to explore philosophy, he cites philosophers by name, and enjoys referencing moral relativism (which he disagrees with) if relevant.
@@ -57,7 +59,7 @@ class SandBot(ChatCompletionCog):
         await interaction.followup.send(f"{interaction.author.mention}: {message}\n\nsand-fish: {response}")
 
     @commands.slash_command(guild_ids=[Configuration.instance().GUILD_ID])
-    async def sands_thoughts(self, interaction: ApplicationCommandInteraction, num_message_context: int = commands.param(ge=1, le=10, default=5)):
+    async def sands_thoughts(self, interaction: ApplicationCommandInteraction, num_message_context: int = 5, context_last_message_id: str = None):
         """
         Get sand's thoughts on the conversation.
 
@@ -67,13 +69,28 @@ class SandBot(ChatCompletionCog):
         """
 
         await interaction.response.defer()
-        
-        messages = await interaction.channel.history(limit=num_message_context).flatten()
+        messages: list[disnake.Message] = []
+
+        if context_last_message_id is not None:            
+            [channel_id, message_id] = context_last_message_id.split('-') if context_last_message_id.find('-') != -1 else context_last_message_id.split('/')[-2:]
+            last_context_message = await self.bot.get_channel(int(channel_id)).get_partial_message(int(message_id)).fetch()
+            messages.append(last_context_message)
+            
+            if num_message_context > 1:
+                messages.extend(await interaction.channel.history(before=last_context_message, limit=num_message_context).flatten())
+        else:
+            messages = (await interaction.channel.history(limit=num_message_context).flatten())[1:]
+
         conversation = str.join('\n', [f'{interaction.author.nick or interaction.author.name}: {message.content}' for message in messages])
         placeholder_replacements = {'%username%': str(interaction.author.nick or interaction.author.name)}
-        response = await self.get_response(f"Oh wow, you're doing great so far! Let's continue imitating sand-fish :). Tell me what sand would say in response to the following conversation:: \n{conversation}", placeholder_replacements)
+        response = await self.get_response(f"Oh wow, you're doing a great job so far! Let's continue imitating sand-fish :). Respond to the following conversation in one message: {conversation}", placeholder_replacements)
 
+        if (len(response) > 2000):
+            await interaction.followup.send(f"Sorry, the context is too long for sand to read. Please try again with a shorter context.")
+            
         await interaction.followup.send(f"sand-fish: {response.removeprefix('sand-fish:').removeprefix('sand:').strip()}")
+
+
 
 
 # Called by bot.load_extension in main

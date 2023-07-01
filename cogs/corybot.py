@@ -1,4 +1,5 @@
 from disnake import ApplicationCommandInteraction
+import disnake
 from disnake.ext import commands
 from cogs.shared.chatcompletion_cog import ChatCompletionCog
 from config import Configuration
@@ -6,6 +7,8 @@ from config import Configuration
 
 class CoryBot(ChatCompletionCog):
     def __init__(self, bot: commands.Bot):
+        self.bot = bot
+        
         user_message_1 = f"""Hi! Today I'd like you to imitate a British roadman zoomer called Cory. I'll be sending you messages and I want you to respond to them the way a zoomer (gen-Z) would.
         Zoomers talk in Gen-Z slang such as "slay", "ong" (meaning "on god"), "fr" (meaning "for real"), "fr fr" (meaning "for real for real"), "no cap" or "no 🧢" and "rizz" (meaning charisma). 
         They use lots of emojis such as 🧢, 💀, 🤡, 🙏, 🔥, 👀, 🤙, 💯 and 🤪. 
@@ -49,21 +52,35 @@ class CoryBot(ChatCompletionCog):
         await interaction.followup.send(f"{interaction.author.mention}: {message}\n\nCory: {response}")
 
     @commands.slash_command(guild_ids=[Configuration.instance().GUILD_ID])
-    async def corys_thoughts(self, interaction: ApplicationCommandInteraction, num_message_context: int = commands.param(ge=1, le=10, default=5)):
+    async def corys_thoughts(self, interaction: ApplicationCommandInteraction, num_message_context: int = 5, context_last_message_id: str = None):
         """
         Get cory's thoughts on the conversation.
 
         Parameters
         ----------
-        num_message_context: number of messages to include in cory's thoughts.        
+        num_message_context: number of messages to include in cory's thoughts.    
+        context_last_message_id: id of the last message in the context. (in the default discord format of channelid-messageid)    
         """
 
         await interaction.response.defer()
-        
-        messages = await interaction.channel.history(limit=num_message_context).flatten()
+        messages: list[disnake.Message] = []
+
+        if context_last_message_id is not None:
+            [channel_id, message_id] = context_last_message_id.split('-') if context_last_message_id.find('-') != -1 else context_last_message_id.split('/')[-2:]
+            last_context_message = await self.bot.get_channel(int(channel_id)).get_partial_message(int(message_id)).fetch()
+            messages.append(last_context_message)
+            
+            if num_message_context > 1:
+                messages.extend(await interaction.channel.history(before=last_context_message, limit=num_message_context).flatten())
+        else:
+            messages = (await interaction.channel.history(limit=num_message_context).flatten())[1:]
+
         conversation = str.join('\n', [f'{interaction.author.nick or interaction.author.name}: {message.content}' for message in messages])
         placeholder_replacements = {'%username%': str(interaction.author.nick or interaction.author.name)}
-        response = await self.get_response(f"Oh wow, you're doing a great job so far! Let's continue :). Tell me what cory would say in response to the following conversation: \n{conversation}", placeholder_replacements)
+        response = await self.get_response(f"Oh wow, you're doing a great job so far! Let's continue imitating cory :). Respond to the following conversation in one message: {conversation}", placeholder_replacements)
+
+        if (len(response) > 2000):
+            await interaction.followup.send(f"Sorry, the context is too long for cory to read. Please try again with a shorter context.")
 
         await interaction.followup.send(f"cory: {response.removeprefix('cory:').removeprefix('Cory:').strip()}")
 
