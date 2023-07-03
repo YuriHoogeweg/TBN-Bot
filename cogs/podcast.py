@@ -43,7 +43,7 @@ class PodcastCog(commands.Cog):
 
         # Move podcast channel to bottom of social category
         await podcast_channel.move(end=True, category=social_channel)
-        await inter.response.send_message("Moved podcast channel to social category", ephemeral=True)
+        await inter.response.send_message("Moved podcast channel to troop category", ephemeral=True)
 
     @commands.slash_command(guild_ids=[Configuration.instance().GUILD_ID], name="podcast_hidechannel", description="Hide podcast channel")
     async def podcast_hidechannel(self, inter: ApplicationCommandInteraction):

@@ -61,7 +61,7 @@ class Major(commands.Cog):
         youtube_buttons = [
             ui.Button(label='YouTube streams',
                       row=1,
-                      url='https://www.youtube.com/@EpulzeGaming/streams',
+                      url='https://www.youtube.com/@ioesports/streams',
                       emoji=youtube_emoji)]
 
         twitch_buttons = [
