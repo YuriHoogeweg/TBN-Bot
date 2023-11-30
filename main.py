@@ -1,5 +1,6 @@
 import logging
 
+
 # Configure logging to file log.txt
 logging.basicConfig(filename='log.txt', encoding='utf-8', filemode='a', level=logging.INFO, format='%(asctime)s:%(levelname)s:%(name)s: %(message)s')
 
@@ -11,6 +12,7 @@ from cogs.birthdays import Birthdays
 from cogs.sandbot import SandBot
 from cogs.shakespearianinsult import ShakeSpearianInsult
 from cogs.formulaone import FormulaOne
+from cogs.frenchify import Frenchify
 from cogs.jointime import JoinTimeCog
 from cogs.major import Major
 from cogs.podcast import PodcastCog
@@ -42,6 +44,7 @@ bot.add_cog(FormulaOne(bot))
 bot.add_cog(CoryBot(bot))
 bot.add_cog(JoinTimeCog(bot))
 bot.add_cog(PodcastCog(bot))
+bot.add_cog(Frenchify(bot))
 
 # Register an event, the on_ready callback is fired when the bot has finished connecting.
 # See a complete list of supported events under https://docs.pycord.dev/en/master/api/events.html#discord.on_ready
