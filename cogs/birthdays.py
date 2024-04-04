@@ -115,7 +115,7 @@ class Birthdays(ChatCompletionCog):
                 else f'Good morning gang, we have _multiple_ birthdays today! Happy birthday to {", ".join([f"<@!{member.id}>" for member in birthday_bois])}! :partying_face: :birthday: :partying_face:'
             )
 
-        await self.bot.get_channel(Configuration.instance().BIRTHDAYS_CHANNEL_ID).send(announcement)
+        await self.bot.get_channel(Configuration.instance().BIRTHDAYS_CHANNEL_ID).send(announcement + "\n\n_Use the /setbirthday command to register your own birthday for future announcements_")
 
 # Called by bot.load_extension in main
 def setup(bot: commands.Bot):
