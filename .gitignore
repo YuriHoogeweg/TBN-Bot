@@ -162,3 +162,7 @@ cython_debug/
 config.ini
 resources/dota/panorama
 resources/tbn-bot-database.db
+devconfig.ini
+log.txt
+prodconfig.ini
+.vscode/
