@@ -30,6 +30,6 @@ class StreamAnnouncer(commands.Cog):
         message = f"Content Alert!\n**{chatbot.name}:** {response}"
         logging.info(f"Stream live announcement: {message}")
         
-        self.bot\
+        await self.bot\
             .get_channel(Configuration.instance().BOT_CHANNEL_ID)\
             .send(message)
