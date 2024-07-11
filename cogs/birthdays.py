@@ -94,7 +94,7 @@ class Birthdays(ChatCompletionCog):
         await self.notify_birthdays()        
         await interaction.delete_original_response()
 
-    @tasks.loop(time=time(hour=7, minute=0, tzinfo=timezone.utc))
+    @tasks.loop(time=time(hour=7, minute=0, tzinfo=timezone.utc), count=None, reconnect=True)
     async def notify_birthdays(self):
         birthday_bois = self.db_session.query(TbnMember)\
             .filter(extract('month', TbnMember.birthday) == datetime.now().month)\
