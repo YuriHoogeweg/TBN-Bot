@@ -1,5 +1,7 @@
 import logging
 
+from cogs.streamannouncer import StreamAnnouncer
+
 
 # Configure logging to file log.txt
 logging.basicConfig(filename='log.txt', encoding='utf-8', filemode='a', level=logging.INFO, format='%(asctime)s:%(levelname)s:%(name)s: %(message)s')
@@ -20,6 +22,8 @@ openai.api_key = Configuration.instance().OPENAI_KEY
 
 # Set intents for the bot here - intents info: https://discord.com/developers/docs/topics/gateway#gateway-intents
 intents = disnake.Intents.default()
+intents.members = True
+intents.presences = True
 
 # members intent is necessary for the bot to be able to read the list of members in a channel or role.
 intents.members = True
@@ -31,10 +35,15 @@ intents.message_content = True
 bot = InteractionBot(intents=intents)
 
 # Load cogs here
-bot.add_cog(SandBot(bot))
+sand_bot = SandBot(bot)
+bot.add_cog(sand_bot)
+
+cory_bot = CoryBot(bot)
+bot.add_cog(cory_bot)
+
+bot.add_cog(StreamAnnouncer(bot, [sand_bot, cory_bot]))
 bot.add_cog(Birthdays(bot))
 bot.add_cog(FormulaOne(bot))
-bot.add_cog(CoryBot(bot))
 bot.add_cog(JoinTimeCog(bot))
 bot.add_cog(PodcastCog(bot))
 

@@ -88,7 +88,10 @@ class JoinTimeCog(commands.Cog):
                         if existing_entry is None or existing_entry.channel_id != channel.id:
                             await self.move_user(voice_state, channel.id)
 
-                        to_delete.remove(existing_entry)
+                        try:
+                            to_delete.remove(existing_entry)
+                        except:
+                            pass
 
         for x in to_delete:
             self.db_session.delete(x)

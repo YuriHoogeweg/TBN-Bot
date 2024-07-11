@@ -30,6 +30,7 @@ class CoryBot(ChatCompletionCog):
         assistant_messages = [assistant_message_1, assistant_message_2]
 
         self.set_message_context("", user_messages, assistant_messages)
+        super().__init__("Cory", bot)
 
     # Register as slash command - pass in Guild ID so command changes propagate immediately
     @commands.slash_command(guild_ids=[Configuration.instance().GUILD_ID])
@@ -44,7 +45,7 @@ class CoryBot(ChatCompletionCog):
 
         await interaction.response.defer()
 
-        placeholder_replacements = {'%username%': str(
+        placeholder_replacements = {f'%username%': str(
             interaction.author.nick or interaction.author.name)}
         msg = f"Oh wow, you're doing a great job so far! Let's continue :). {message}"
         response = await self.get_response(msg, placeholder_replacements)

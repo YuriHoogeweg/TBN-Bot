@@ -11,9 +11,9 @@ from retry import retry
 
 
 class ChatCompletionCog(commands.Cog):
-    async def __init__(self,
-                       bot: commands.Bot):
-        self.bot = bot        
+    def __init__(self, name: str, bot: commands.Bot):
+        self.bot = bot    
+        self.name = name    
 
     def set_message_context(self, sys_prompt: str, usr_msg: List[str], ast_msg: List[str]):
         messages = [{"role": "system", "content": sys_prompt}]
@@ -46,7 +46,7 @@ class ChatCompletionCog(commands.Cog):
     @retry(tries=3, delay=5, backoff=5, logger=logging.getLogger(__name__))
     def __call_openai(self, messages) -> str:
         completion = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo-0613",
+            model="gpt-3.5-turbo",
             messages=messages
         )
 
