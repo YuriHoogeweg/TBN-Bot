@@ -29,4 +29,5 @@ class Configuration:
             cls._instance.SOCIAL_CATEGORY_ID = int(config['discord']['SOCIAL_CATEGORY_ID'])
             cls._instance.ARCHIVE_CATEGORY_ID = int(config['discord']['ARCHIVE_CATEGORY_ID'])
             cls._instance.BOT_CHANNEL_ID = int(config['discord']['BOT_CHANNEL_ID'])
+            cls._instance.STREAMER_ROLE_ID = int(config['discord']['STREAMER_ROLE_ID'])
         return cls._instance

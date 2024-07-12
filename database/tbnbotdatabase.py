@@ -12,14 +12,16 @@ Base = declarative_base()
 class TbnMember(Base):
     __tablename__ = 'tbn_member'
 
-    def __init__(self, id: int, birthday: datetime):
+    def __init__(self, id: int, birthday: datetime, last_stream_announcement_timestamp: datetime):
         self.id = id
         self.birthday = birthday
         self.created_at = datetime.now()
+        self.last_stream_announcement_timestamp: datetime
 
     id = Column(Integer, primary_key=True)
     birthday = Column(Date)
     created_at = Column(DateTime)
+    last_stream_announcement_timestamp = Column(DateTime)
 
 class TbnMemberAudit(Base):
     __tablename__ = 'tbn_member_audit'
