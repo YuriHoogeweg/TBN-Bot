@@ -39,7 +39,7 @@ class SandBot(ChatCompletionCog):
         self.set_message_context(
             system_prompt, user_messages, assistant_messages)
         
-        super().__init__("Sand", bot)
+        super().__init__("sand-fish", bot)
 
     # Register as slash command - pass in Guild ID so command changes propagate immediately
     @commands.slash_command(guild_ids=[Configuration.instance().GUILD_ID])
