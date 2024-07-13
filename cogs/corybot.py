@@ -50,7 +50,7 @@ class CoryBot(ChatCompletionCog):
         msg = f"Oh wow, you're doing a great job so far! Let's continue :). {message}"
         response = await self.get_response(msg, placeholder_replacements)
 
-        await interaction.followup.send(f"{interaction.author.mention}: {message}\n\nCory: {response}")
+        await interaction.followup.send(f"{interaction.author.mention}: {message}\n\n**Cory:** {response}")
 
     @commands.slash_command(guild_ids=[Configuration.instance().GUILD_ID])
     async def corys_thoughts(self, interaction: ApplicationCommandInteraction, num_message_context: int = 5, context_last_message_id: str = None):

@@ -58,7 +58,7 @@ class SandBot(ChatCompletionCog):
         msg = f"Oh wow, you're doing great so far! Let's continue imitating sand-fish :). {message}"
         response = await self.get_response(msg, placeholder_replacements)        
 
-        await interaction.followup.send(f"{interaction.author.mention}: {message}\n\nsand-fish: {response}")
+        await interaction.followup.send(f"{interaction.author.mention}: {message}\n\n**sand-fish:** {response}")
 
     @commands.slash_command(guild_ids=[Configuration.instance().GUILD_ID])
     async def sands_thoughts(self, interaction: ApplicationCommandInteraction, num_message_context: int = 5, context_last_message_id: str = None):
