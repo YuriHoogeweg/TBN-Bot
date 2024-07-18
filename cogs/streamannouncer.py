@@ -26,8 +26,8 @@ class StreamAnnouncer(commands.Cog):
         chatbot = random.choice(self.chat_bots)
         
         chatbot_message = f"""Our mutual friend {after.display_name} just started streaming, could you write an announcement to share and promote his stream to our Discord server called The Biscuit Network (TBN)? 
-            The game they're streaming is {after.activity.game}, their stream title is {after.activity.name} and the URL to their stream is {after.activity.url}. 
-            Make sure to incorporate the Discord server's name, their name, game, stream title and URL in your announcement! Tell me only the announcement, nothing else"""
+            The game they're streaming is `{after.activity.game}`, their stream title is `{after.activity.name}` and the URL to their stream is `{after.activity.url}`. 
+            Incorporate the Discord server's name, their name, game, stream title and URL in your announcement, include the URL exactly as provided and do not alter it in any way! Tell me only the announcement, nothing else"""
         
         response = await chatbot.get_response(chatbot_message, placeholder_replacements)
 
