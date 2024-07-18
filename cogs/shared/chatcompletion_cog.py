@@ -46,7 +46,7 @@ class ChatCompletionCog(commands.Cog):
     @retry(tries=3, delay=5, backoff=5, logger=logging.getLogger(__name__))
     def __call_openai(self, messages) -> str:
         completion = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
+            model="gpt-4o-mini",
             messages=messages
         )
 
