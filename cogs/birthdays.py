@@ -2,7 +2,7 @@ import time
 from disnake import ApplicationCommandInteraction
 import disnake
 from disnake.ext import commands, tasks
-from sqlalchemy import extract, func
+from sqlalchemy import and_, case, extract, or_
 from cogs.shared.chatcompletion_cog import ChatCompletionCog
 from config import Configuration
 from datetime import datetime, timedelta, timezone, time
@@ -75,22 +75,33 @@ class Birthdays(ChatCompletionCog):
         today = datetime.now().date()
         thirty_days_later = today + timedelta(days=31)
         
-        # Handle year wrap-around
-        if today.month == 12:
-            upcoming_birthdays = self.db_session.query(TbnMember).filter(
-                ((extract('month', TbnMember.birthday) == 12) & (extract('day', TbnMember.birthday) >= today.day)) |
-                ((extract('month', TbnMember.birthday) == 1) & (extract('day', TbnMember.birthday) <= thirty_days_later.day))
-            ).order_by(
-                func.make_date(2000, extract('month', TbnMember.birthday), extract('day', TbnMember.birthday))
-            ).all()
-        else:
-            upcoming_birthdays = self.db_session.query(TbnMember).filter(
-                ((extract('month', TbnMember.birthday) == today.month) & (extract('day', TbnMember.birthday) >= today.day)) |
-                ((extract('month', TbnMember.birthday) == thirty_days_later.month) & (extract('day', TbnMember.birthday) <= thirty_days_later.day)) |
-                ((extract('month', TbnMember.birthday) > today.month) & (extract('month', TbnMember.birthday) < thirty_days_later.month))
-            ).order_by(
-                func.make_date(2000, extract('month', TbnMember.birthday), extract('day', TbnMember.birthday))
-            ).all()
+        # Create a case statement for sorting
+        sort_case = case(
+            (extract('month', TbnMember.birthday) < today.month, extract('month', TbnMember.birthday) + 12),
+            (and_(extract('month', TbnMember.birthday) == today.month, 
+                  extract('day', TbnMember.birthday) < today.day), 
+             extract('month', TbnMember.birthday) + 12),
+            else_=extract('month', TbnMember.birthday)
+        )
+
+        # Build the query
+        query = self.db_session.query(TbnMember).filter(
+            or_(
+                and_(extract('month', TbnMember.birthday) == today.month, 
+                     extract('day', TbnMember.birthday) >= today.day),
+                and_(extract('month', TbnMember.birthday) == thirty_days_later.month, 
+                     extract('day', TbnMember.birthday) <= thirty_days_later.day),
+                and_(extract('month', TbnMember.birthday) > today.month, 
+                     extract('month', TbnMember.birthday) < thirty_days_later.month),
+                and_(today.month == 12, 
+                     extract('month', TbnMember.birthday) == 1)
+            )
+        ).order_by(
+            sort_case,
+            extract('day', TbnMember.birthday)
+        )
+
+        upcoming_birthdays = query.all()
 
         if not upcoming_birthdays:
             await interaction.response.send_message("There are no upcoming birthdays in the next 31 days.", ephemeral=True)
@@ -99,11 +110,12 @@ class Birthdays(ChatCompletionCog):
         birthday_output_format = "%B %d"  # Month Day format
         birthday_list = []
         for member in upcoming_birthdays:
-            birthday_date = member.birthday.replace(year=datetime.now().year)
+            birthday_date = member.birthday.replace(year=today.year)
             if birthday_date < today:
-                birthday_date = birthday_date.replace(year=datetime.now().year + 1)
+                birthday_date = birthday_date.replace(year=today.year + 1)
             days_until = (birthday_date - today).days
-            birthday_list.append(f"<@{member.discord_id}>: {member.birthday.strftime(birthday_output_format)} (in {days_until} days)")
+            if days_until <= 31:  # Additional check to ensure we're within 31 days
+                birthday_list.append(f"<@{member.id}>: {member.birthday.strftime(birthday_output_format)} (in {days_until} days)")
 
         message = "Upcoming birthdays in the next 31 days:\n" + os.linesep.join(birthday_list)
         
@@ -180,7 +192,7 @@ class Birthdays(ChatCompletionCog):
             ).all()
 
             for db_member in current_birthday_members:
-                member = guild.get_member(db_member.discord_id)
+                member = guild.get_member(db_member.id)
                 if member:
                     try:
                         await member.add_roles(birthday_role, reason="It's their birthday!")
@@ -188,7 +200,7 @@ class Birthdays(ChatCompletionCog):
                     except disnake.HTTPException as e:
                         logger.error(f"Failed to add birthday role to {member.name} (ID: {member.id}) in {guild.name}: {e}")
                 else:
-                    logger.warning(f"Member with ID {db_member.discord_id} not found in guild {guild.name} (ID: {guild.id})")
+                    logger.warning(f"Member with ID {db_member.id} not found in guild {guild.name} (ID: {guild.id})")
 
     @manage_birthday_roles.before_loop
     async def before_manage_birthday_roles(self):
