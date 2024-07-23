@@ -2,7 +2,7 @@ import time
 from disnake import ApplicationCommandInteraction
 import disnake
 from disnake.ext import commands, tasks
-from sqlalchemy import extract
+from sqlalchemy import extract, func
 from cogs.shared.chatcompletion_cog import ChatCompletionCog
 from config import Configuration
 from datetime import datetime, timedelta, timezone, time
@@ -66,20 +66,52 @@ class Birthdays(ChatCompletionCog):
 
         await interaction.response.send_message(f"{interaction.author.mention}, your birthday is registered as {date.date().strftime(birthday_output_format)}", ephemeral=True)
 
-    @commands.slash_command(guild_ids=[Configuration.instance().GUILD_ID], name="upcomingbirthdays", description="See all birthdays in the next 31 days.")
+    @commands.slash_command(
+        guild_ids=[Configuration.instance().GUILD_ID],
+        name="upcomingbirthdays",
+        description="See all birthdays in the next 31 days."
+    )
     async def upcoming_birthdays(self, interaction: ApplicationCommandInteraction):
-        # TODO figure out how to filter this within the sqlalchemy query
-        all_members = self.db_session.query(TbnMember)\
-            .filter(TbnMember.birthday != None)\
-            .order_by(TbnMember.birthday.asc()).all()
+        today = datetime.now().date()
+        thirty_days_later = today + timedelta(days=31)
         
-        def is_upcoming_birthday(member: TbnMember):
-            birthday = datetime(year = datetime.now().year, month = member.birthday.month, day = member.birthday.day)
-            return birthday > datetime.now() and birthday < datetime.now() + timedelta(days = 31)
+        # Handle year wrap-around
+        if today.month == 12:
+            upcoming_birthdays = self.db_session.query(TbnMember).filter(
+                ((extract('month', TbnMember.birthday) == 12) & (extract('day', TbnMember.birthday) >= today.day)) |
+                ((extract('month', TbnMember.birthday) == 1) & (extract('day', TbnMember.birthday) <= thirty_days_later.day))
+            ).order_by(
+                func.make_date(2000, extract('month', TbnMember.birthday), extract('day', TbnMember.birthday))
+            ).all()
+        else:
+            upcoming_birthdays = self.db_session.query(TbnMember).filter(
+                ((extract('month', TbnMember.birthday) == today.month) & (extract('day', TbnMember.birthday) >= today.day)) |
+                ((extract('month', TbnMember.birthday) == thirty_days_later.month) & (extract('day', TbnMember.birthday) <= thirty_days_later.day)) |
+                ((extract('month', TbnMember.birthday) > today.month) & (extract('month', TbnMember.birthday) < thirty_days_later.month))
+            ).order_by(
+                func.make_date(2000, extract('month', TbnMember.birthday), extract('day', TbnMember.birthday))
+            ).all()
 
-        upcoming_birthday_bois = filter(is_upcoming_birthday, all_members)
+        if not upcoming_birthdays:
+            await interaction.response.send_message("There are no upcoming birthdays in the next 31 days.", ephemeral=True)
+            return
 
-        await interaction.response.send_message(f"Upcoming birthdays in the next 31 days:\n{os.linesep.join([f'<@!{member.id}>: {member.birthday.strftime(birthday_output_format)}' for member in upcoming_birthday_bois])}", ephemeral=True)
+        birthday_output_format = "%B %d"  # Month Day format
+        birthday_list = []
+        for member in upcoming_birthdays:
+            birthday_date = member.birthday.replace(year=datetime.now().year)
+            if birthday_date < today:
+                birthday_date = birthday_date.replace(year=datetime.now().year + 1)
+            days_until = (birthday_date - today).days
+            birthday_list.append(f"<@{member.discord_id}>: {member.birthday.strftime(birthday_output_format)} (in {days_until} days)")
+
+        message = "Upcoming birthdays in the next 31 days:\n" + os.linesep.join(birthday_list)
+        
+        # Handle message length limit
+        if len(message) > 2000:
+            message = message[:1997] + "..."
+
+        await interaction.response.send_message(message, ephemeral=True)
 
     @commands.slash_command(guild_ids=[Configuration.instance().GUILD_ID], name="removebirthday", description="Remove your birthday.")
     async def remove_birthday(self, interaction: ApplicationCommandInteraction):
