@@ -1,11 +1,7 @@
-import logging
+from logger_config import setup_logging
 
+setup_logging()
 from cogs.streamannouncer import StreamAnnouncer
-
-
-# Configure logging to file log.txt
-logging.basicConfig(filename='log.txt', encoding='utf-8', filemode='a', level=logging.INFO, format='%(asctime)s:%(levelname)s:%(name)s: %(message)s')
-
 import disnake
 from disnake.ext.commands import InteractionBot
 from cogs.corybot import CoryBot

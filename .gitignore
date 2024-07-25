@@ -166,3 +166,4 @@ devconfig.ini
 log.txt
 prodconfig.ini
 .vscode/
+logs/
