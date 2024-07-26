@@ -7,13 +7,14 @@ from cogs.shared.chatcompletion_cog import ChatCompletionCog
 from config import Configuration
 from datetime import datetime, timedelta, timezone, time
 from database import database_session, TbnMember
+from sqlalchemy.exc import SQLAlchemyError
 import os
 import logging
 
 from database.tbnbotdatabase import TbnMemberAudit
 
-birthday_input_format = '%d/%m/%Y'
-birthday_output_format = '%d %B'
+BIRTHDAY_INPUT_FORMAT = "%d/%m/%Y"
+BIRTHDAY_OUTPUT_FORMAT = "%d %B"
 
 logger = logging.getLogger(__name__)
 
@@ -46,26 +47,69 @@ class Birthdays(ChatCompletionCog):
         self.notify_birthdays.cancel()
         self.clear_birthday_roles.cancel()
 
-    # Register as slash command - pass in Guild ID so command changes propagate immediately
-    @commands.slash_command(guild_ids=[Configuration.instance().GUILD_ID], name="setbirthday", description="Set your birthday")
+    @commands.slash_command(
+        guild_ids=[Configuration.instance().GUILD_ID],
+        name="setbirthday",
+        description="Set your birthday"
+    )
     async def set_birthday(self, interaction: ApplicationCommandInteraction, birthday: str):
         """
         Set your birthday so you can be congratulated in the future.
-
         Parameters
         ----------
         birthday: dd/mm or dd/mm/yyyy format.
-        """        
-        date = datetime.strptime(birthday if len(birthday) == 10 else birthday[0:5] + '/1900', birthday_input_format)
+        """
+        logger = logging.getLogger(__name__)
+        logger.info(f"User {interaction.author.name} (ID: {interaction.author.id}) is attempting to set birthday: {birthday}")
 
-        changed_member = TbnMember(interaction.author.id, date)        
-        self.db_session.merge(changed_member)        
-        self.db_session.add(TbnMemberAudit(changed_member))
-        
-        self.db_session.commit()
+        try:
+            # Parse the date
+            if len(birthday) == 5:  # dd/mm format
+                date = datetime.strptime(birthday + '/1900', BIRTHDAY_INPUT_FORMAT)
+            elif len(birthday) == 10:  # dd/mm/yyyy format
+                date = datetime.strptime(birthday, BIRTHDAY_INPUT_FORMAT)
+            else:
+                raise ValueError("Invalid date format")
 
-        await interaction.response.send_message(f"{interaction.author.mention}, your birthday is registered as {date.date().strftime(birthday_output_format)}", ephemeral=True)
+            # Create or update member
+            changed_member = TbnMember(interaction.author.id, date)
+            self.db_session.merge(changed_member)
+            
+            # Add audit entry
+            self.db_session.add(TbnMemberAudit(changed_member))
+            
+            # Commit changes
+            self.db_session.commit()
 
+            logger.info(f"Successfully set birthday for user {interaction.author.name} (ID: {interaction.author.id}) to {date.date()}")
+            
+            await interaction.response.send_message(
+                f"{interaction.author.mention}, your birthday is registered as {date.date().strftime(BIRTHDAY_OUTPUT_FORMAT)}",
+                ephemeral=True
+            )
+
+        except ValueError as e:
+            logger.error(f"Invalid date format provided by user {interaction.author.name} (ID: {interaction.author.id}): {birthday}")
+            await interaction.response.send_message(
+                f"Sorry, that's not a valid date format. Please use dd/mm or dd/mm/yyyy.",
+                ephemeral=True
+            )
+
+        except SQLAlchemyError as e:
+            logger.error(f"Database error while setting birthday for user {interaction.author.name} (ID: {interaction.author.id}): {str(e)}")
+            self.db_session.rollback()
+            await interaction.response.send_message(
+                "Sorry, there was an error saving your birthday. Please try again later.",
+                ephemeral=True
+            )
+
+        except Exception as e:
+            logger.error(f"Unexpected error while setting birthday for user {interaction.author.name} (ID: {interaction.author.id}): {str(e)}")
+            await interaction.response.send_message(
+                "Sorry, an unexpected error occurred. Please try again later.",
+                ephemeral=True
+            )
+            
     @commands.slash_command(
         guild_ids=[Configuration.instance().GUILD_ID],
         name="upcomingbirthdays",

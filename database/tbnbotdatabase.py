@@ -12,11 +12,11 @@ Base = declarative_base()
 class TbnMember(Base):
     __tablename__ = 'tbn_member'
 
-    def __init__(self, id: int, birthday: datetime, last_stream_announcement_timestamp: datetime):
+    def __init__(self, id: int, birthday: datetime, last_stream_announcement_timestamp: datetime = None):
         self.id = id
         self.birthday = birthday
         self.created_at = datetime.now()
-        self.last_stream_announcement_timestamp: datetime
+        self.last_stream_announcement_timestamp = last_stream_announcement_timestamp
 
     id = Column(Integer, primary_key=True)
     birthday = Column(Date)
