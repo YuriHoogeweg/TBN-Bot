@@ -92,7 +92,7 @@ class StreamAnnouncer(commands.Cog):
         try:
             if tbn_member is None:
                 # If the member doesn't exist in the database, create a new entry
-                tbn_member = TbnMember(id=discord_member.id, last_stream_announcement_timestamp=datetime.now())
+                tbn_member = TbnMember(id=discord_member.id, birthday=None, last_stream_announcement_timestamp=datetime.now())
                 session.add(tbn_member)
             else:
                 # If the member exists, update their timestamp
