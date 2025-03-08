@@ -17,13 +17,8 @@ class Configuration:
             cls._instance.GUILD_ID = int(config['discord']['GUILD_ID'])
             cls._instance.CLIENT_ID = int(config['discord']['CLIENT_ID'])
             cls._instance.TOKEN = config['discord']['TOKEN']
-            cls._instance.OPENAI_KEY = config['openai']['KEY']
             cls._instance.BIRTHDAYS_CHANNEL_ID = int(
                 config['discord']['BIRTHDAYS_CHANNEL_ID'])
-            cls._instance.DOTABUFF_EMOJI = config['discord']['DOTABUFF_EMOJI']
-            cls._instance.TWITCH_EMOJI = config['discord']['TWITCH_EMOJI']
-            cls._instance.LIQUIPEDIA_EMOJI = config['discord']['LIQUIPEDIA_EMOJI']
-            cls._instance.YOUTUBE_EMOJI = config['discord']['YOUTUBE_EMOJI']
             cls._instance.PODCAST_PARTICIPANT_ROLE_ID = int(config['discord']['PODCAST_PARTICIPANT_ROLE_ID'])
             cls._instance.PODCAST_CHANNEL_ID = int(config['discord']['PODCAST_CHANNEL_ID'])
             cls._instance.SOCIAL_CATEGORY_ID = int(config['discord']['SOCIAL_CATEGORY_ID'])
@@ -31,4 +26,14 @@ class Configuration:
             cls._instance.BOT_CHANNEL_ID = int(config['discord']['BOT_CHANNEL_ID'])
             cls._instance.STREAMER_ROLE_ID = int(config['discord']['STREAMER_ROLE_ID'])
             cls._instance.BIRTHDAY_ROLE_ID = int(config['discord']['BIRTHDAY_ROLE_ID'])
+            cls._instance.BAMBEANER_ROLE_ID = int(config['discord']['BAMBEANER_ROLE_ID'])
+            cls._instance.BAMBO_USER_ID = int(config['discord']['BAMBO_USER_ID'])
+            
+            cls._instance.DOTABUFF_EMOJI = config['discord']['DOTABUFF_EMOJI']
+            cls._instance.TWITCH_EMOJI = config['discord']['TWITCH_EMOJI']
+            cls._instance.LIQUIPEDIA_EMOJI = config['discord']['LIQUIPEDIA_EMOJI']
+            cls._instance.YOUTUBE_EMOJI = config['discord']['YOUTUBE_EMOJI']
+            
+            cls._instance.OPENAI_KEY = config['openai']['KEY']
+            cls._instance.GROK_KEY = config['grok']['KEY']
         return cls._instance

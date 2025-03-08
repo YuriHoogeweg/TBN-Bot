@@ -20,7 +20,8 @@ logger = logging.getLogger(__name__)
 
 class Birthdays(ChatCompletionCog):
     def __init__(self, bot: commands.Bot):
-        self.bot = bot
+        super().__init__("Birthdays", bot)
+        
         self.db_session = database_session()
         self.notify_birthdays.start()
         self.manage_birthday_roles.start()

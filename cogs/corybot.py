@@ -34,7 +34,11 @@ class CoryBot(ChatCompletionCog):
 
     # Register as slash command - pass in Guild ID so command changes propagate immediately
     @commands.slash_command(guild_ids=[Configuration.instance().GUILD_ID])
-    async def cory(self, interaction: ApplicationCommandInteraction, message: str):
+    async def cory(self, interaction: ApplicationCommandInteraction, message: str, llm: str = commands.Param(
+            default="openai",
+            choices=["openai", "grok"],
+            description="Which AI model to use"
+        )):
         """
         Talk to cory.
 
@@ -48,9 +52,9 @@ class CoryBot(ChatCompletionCog):
         placeholder_replacements = {f'%username%': str(
             interaction.author.nick or interaction.author.name)}
         msg = f"Oh wow, you're doing a great job so far! Let's continue :). {message}"
-        response = await self.get_response(msg, placeholder_replacements)
+        response = await self.get_response(msg, placeholder_replacements, llm)
 
-        await interaction.followup.send(f"{interaction.author.mention}: {message}\n\n**Cory:** {response}")
+        await interaction.followup.send(f"{interaction.author.mention}: {message}\n\n**Cory ({llm}):** {response}")
 
     @commands.slash_command(guild_ids=[Configuration.instance().GUILD_ID])
     async def corys_thoughts(self, interaction: ApplicationCommandInteraction, num_message_context: int = 5, context_last_message_id: str = None):

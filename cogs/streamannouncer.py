@@ -17,6 +17,8 @@ class StreamAnnouncer(commands.Cog):
         self.db_session = database_session()
         self.streamer_role_id = Configuration.instance().STREAMER_ROLE_ID
         self.announcement_channel_id = Configuration.instance().BOT_CHANNEL_ID
+        self.bambeaner_role_Id = Configuration.instance().BAMBEANER_ROLE_ID
+        self.bambo_user_id = Configuration.instance().BAMBO_USER_ID
 
     @commands.Cog.listener()
     async def on_presence_update(self, before: Member, after: Member):
@@ -33,9 +35,11 @@ class StreamAnnouncer(commands.Cog):
                 The game they're streaming is `{stream_info.game}`, their stream title is `{stream_info.name}` and the URL to their stream is `{stream_info.url}`.
                 Incorporate the Discord server's name, their name, game, stream title and URL in your announcement, include the URL exactly as provided and do not alter it in any way! Tell me only the announcement, nothing else"""
             
-            response = await chatbot.get_response(chatbot_message, placeholder_replacements)
+            response = await chatbot.get_response(chatbot_message, placeholder_replacements, "openai")
             sanitized = sanitize_url_in_text(response, stream_info.url)
-            message = f"# Content Alert!\n**{chatbot.name}:** {sanitized}"
+            
+            message_heading = f"# Content Alert <@&{self.bambeaner_role_Id}>!" if after.id == self.bambo_user_id else f"#Content Alert!" 
+            message = f"{message_heading}\n**{chatbot.name}:** {sanitized}"
             logging.info(f"Stream live announcement: {message}")
             
             await self.send_announcement(message)            
