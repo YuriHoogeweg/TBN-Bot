@@ -10,6 +10,7 @@ from cogs.sandbot import SandBot
 from cogs.formulaone import FormulaOne
 from cogs.jointime import JoinTimeCog
 from cogs.podcast import PodcastCog
+from cogs.naughtylist import NaughtyListCog
 from config import Configuration
 import openai
 
@@ -42,6 +43,7 @@ bot.add_cog(Birthdays(bot))
 bot.add_cog(FormulaOne(bot))
 bot.add_cog(JoinTimeCog(bot))
 bot.add_cog(PodcastCog(bot))
+bot.add_cog(NaughtyListCog(bot))
 
 # Register an event, the on_ready callback is fired when the bot has finished connecting.
 # See a complete list of supported events under https://docs.pycord.dev/en/master/api/events.html#discord.on_ready

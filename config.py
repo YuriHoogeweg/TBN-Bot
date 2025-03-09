@@ -13,7 +13,7 @@ class Configuration:
 
             # Read config variables from config.ini
             config = ConfigParser()
-            config.read('config.ini')
+            config.read('devconfig.ini')
             cls._instance.GUILD_ID = int(config['discord']['GUILD_ID'])
             cls._instance.CLIENT_ID = int(config['discord']['CLIENT_ID'])
             cls._instance.TOKEN = config['discord']['TOKEN']
@@ -28,6 +28,7 @@ class Configuration:
             cls._instance.BIRTHDAY_ROLE_ID = int(config['discord']['BIRTHDAY_ROLE_ID'])
             cls._instance.BAMBEANER_ROLE_ID = int(config['discord']['BAMBEANER_ROLE_ID'])
             cls._instance.BAMBO_USER_ID = int(config['discord']['BAMBO_USER_ID'])
+            cls._instance.NAUGHTY_LIST_ROLE_ID = int(config['discord']['NAUGHTY_LIST_ROLE_ID'])
             
             cls._instance.DOTABUFF_EMOJI = config['discord']['DOTABUFF_EMOJI']
             cls._instance.TWITCH_EMOJI = config['discord']['TWITCH_EMOJI']

@@ -15,10 +15,12 @@ class StreamAnnouncer(commands.Cog):
         self.bot = bot
         self.chat_bots = chat_bots
         self.db_session = database_session()
-        self.streamer_role_id = Configuration.instance().STREAMER_ROLE_ID
-        self.announcement_channel_id = Configuration.instance().BOT_CHANNEL_ID
-        self.bambeaner_role_Id = Configuration.instance().BAMBEANER_ROLE_ID
-        self.bambo_user_id = Configuration.instance().BAMBO_USER_ID
+        
+        config = Configuration.instance()
+        self.streamer_role_id = config.STREAMER_ROLE_ID
+        self.announcement_channel_id = config.BOT_CHANNEL_ID
+        self.bambeaner_role_Id = config.BAMBEANER_ROLE_ID
+        self.bambo_user_id = config.BAMBO_USER_ID
 
     @commands.Cog.listener()
     async def on_presence_update(self, before: Member, after: Member):
