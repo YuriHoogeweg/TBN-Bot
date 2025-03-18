@@ -81,7 +81,7 @@ class StreamAnnouncer(commands.Cog):
             last_stream_announcement_time = member.last_stream_announcement_timestamp if member else None
             
             can_announce = (last_stream_announcement_time is None 
-                            or last_stream_announcement_time < datetime.now() - timedelta(hours=6))
+                            or last_stream_announcement_time < datetime.now() - timedelta(hours=1))
             
             logging.info(f"Can announce for {after.name} (ID: {after.id}): {can_announce}, Last announcement time: {last_stream_announcement_time}")
             
