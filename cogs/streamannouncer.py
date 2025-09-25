@@ -40,7 +40,7 @@ class StreamAnnouncer(commands.Cog):
             response = await chatbot.get_response(chatbot_message, placeholder_replacements, "openai")
             sanitized = sanitize_url_in_text(response, stream_info.url)
             
-            message_heading = f"# Content Alert <@&{self.bambeaner_role_Id}>!" if after.id == self.bambo_user_id else f"#Content Alert!" 
+            message_heading = f"# Content Alert <@&{self.bambeaner_role_Id}>!" if after.id == self.bambo_user_id else f"# Content Alert!" 
             message = f"{message_heading}\n**{chatbot.name}:** {sanitized}"
             logging.info(f"Stream live announcement: {message}")
             
