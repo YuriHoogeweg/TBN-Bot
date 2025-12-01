@@ -11,6 +11,7 @@ from cogs.formulaone import FormulaOne
 from cogs.jointime import JoinTimeCog
 from cogs.podcast import PodcastCog
 from cogs.naughtylist import NaughtyListCog
+from cogs.embedvideo import EmbedVideo
 from config import Configuration
 import openai
 
@@ -42,6 +43,7 @@ bot.add_cog(StreamAnnouncer(bot, [sand_bot, cory_bot]))
 bot.add_cog(Birthdays(bot))
 bot.add_cog(FormulaOne(bot))
 bot.add_cog(JoinTimeCog(bot))
+bot.add_cog(EmbedVideo(bot))
 bot.add_cog(PodcastCog(bot))
 bot.add_cog(NaughtyListCog(bot))
 
