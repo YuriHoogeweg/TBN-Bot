@@ -180,6 +180,7 @@ class Birthdays(ChatCompletionCog):
     @commands.slash_command(guild_ids=[Configuration.instance().GUILD_ID], name="showbirthday", description="Show your birthday, just in case you forgot.")
     async def show_birthday(self, interaction: ApplicationCommandInteraction):
         birthday_boi = self.db_session.query(TbnMember).filter(TbnMember.id == interaction.author.id).first()
+        birthday_output_format = "%B %d"  # Month Day format
         await interaction.response.send_message(f"{interaction.author.mention}, your birthday is registered as {birthday_boi.birthday.strftime(birthday_output_format)}", ephemeral=True)
     
     @commands.slash_command(guild_ids=[Configuration.instance().GUILD_ID], name="announcebirthdays", description="Trigger the birthday announcement.")
