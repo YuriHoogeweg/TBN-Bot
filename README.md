@@ -23,7 +23,7 @@ Your [OpenAI API key](https://platform.openai.com/account/api-keys)
 
 # Installation
 
-Python 3  
+Python 3.11
 
 Install dependencies from requirements.txt  
 ```bash

@@ -162,8 +162,10 @@ cython_debug/
 config.ini
 resources/dota/panorama
 resources/tbn-bot-database.db
+resources/downloads
 devconfig.ini
 log.txt
 prodconfig.ini
 .vscode/
 logs/
+ffmpeg/
