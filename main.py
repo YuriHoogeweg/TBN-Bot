@@ -1,3 +1,4 @@
+from cogs.anonymous import Anonymous
 from logger_config import setup_logging
 
 setup_logging()
@@ -46,6 +47,7 @@ bot.add_cog(JoinTimeCog(bot))
 bot.add_cog(EmbedVideo(bot))
 bot.add_cog(PodcastCog(bot))
 bot.add_cog(NaughtyListCog(bot))
+bot.add_cog(Anonymous(bot))
 
 # Register an event, the on_ready callback is fired when the bot has finished connecting.
 # See a complete list of supported events under https://docs.pycord.dev/en/master/api/events.html#discord.on_ready
