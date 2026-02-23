@@ -49,7 +49,6 @@ class Birthdays(ChatCompletionCog):
         self.clear_birthday_roles.cancel()
 
     @commands.slash_command(
-        guild_ids=[Configuration.instance().GUILD_ID],
         name="setbirthday",
         description="Set your birthday"
     )
@@ -112,7 +111,6 @@ class Birthdays(ChatCompletionCog):
             )
             
     @commands.slash_command(
-        guild_ids=[Configuration.instance().GUILD_ID],
         name="upcomingbirthdays",
         description="See all birthdays in the next 31 days."
     )
@@ -170,20 +168,20 @@ class Birthdays(ChatCompletionCog):
 
         await interaction.response.send_message(message, ephemeral=True)
 
-    @commands.slash_command(guild_ids=[Configuration.instance().GUILD_ID], name="removebirthday", description="Remove your birthday.")
+    @commands.slash_command(name="removebirthday", description="Remove your birthday.")
     async def remove_birthday(self, interaction: ApplicationCommandInteraction):
         self.db_session.query(TbnMember).filter(TbnMember.id == interaction.author.id).first().birthday = None
         self.db_session.commit()
 
         await interaction.response.send_message(f"{interaction.author.mention}, your birthday has been removed.", ephemeral=True)
 
-    @commands.slash_command(guild_ids=[Configuration.instance().GUILD_ID], name="showbirthday", description="Show your birthday, just in case you forgot.")
+    @commands.slash_command(name="showbirthday", description="Show your birthday, just in case you forgot.")
     async def show_birthday(self, interaction: ApplicationCommandInteraction):
         birthday_boi = self.db_session.query(TbnMember).filter(TbnMember.id == interaction.author.id).first()
         birthday_output_format = "%B %d"  # Month Day format
         await interaction.response.send_message(f"{interaction.author.mention}, your birthday is registered as {birthday_boi.birthday.strftime(birthday_output_format)}", ephemeral=True)
     
-    @commands.slash_command(guild_ids=[Configuration.instance().GUILD_ID], name="announcebirthdays", description="Trigger the birthday announcement.")
+    @commands.slash_command(name="announcebirthdays", description="Trigger the birthday announcement.")
     @commands.default_member_permissions(manage_guild=True)
     async def trigger_birthdays_announcement(self, interaction: ApplicationCommandInteraction):
         await interaction.response.defer()        

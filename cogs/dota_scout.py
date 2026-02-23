@@ -7,7 +7,6 @@ from disnake import ApplicationCommandInteraction
 from disnake.ext import commands
 from PIL import Image, ImageDraw, ImageFont
 
-from config import Configuration
 from utils.steam import convert_to_steam32
 
 OPENDOTA_BASE = "https://api.opendota.com/api"
@@ -104,7 +103,6 @@ class DotaScout(commands.Cog):
         self.bot = bot
 
     @commands.slash_command(
-        guild_ids=[Configuration.instance().GUILD_ID],
         description="Scout a player's top 10 most played Dota 2 heroes.",
     )
     async def scout(

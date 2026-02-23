@@ -1,7 +1,6 @@
 from disnake import ApplicationCommandInteraction
 import disnake
 from disnake.ext import commands
-from config import Configuration
 import re
 import yt_dlp
 import asyncio
@@ -97,7 +96,6 @@ class EmbedVideo(commands.Cog):
         return file_path
 
     @commands.slash_command(
-        guild_ids=[Configuration.instance().GUILD_ID],
         name="embed_video",
         description="Embeds Reddit or Instagram video to message"
     )

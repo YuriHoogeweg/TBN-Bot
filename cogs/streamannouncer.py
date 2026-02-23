@@ -33,7 +33,7 @@ class StreamAnnouncer(commands.Cog):
         except Exception as e:
             logging.error(f"Error in on_presence_update: {str(e)}", exc_info=True)
             
-    @commands.slash_command(guild_ids=[Configuration.instance().GUILD_ID], name="announce_stream", description="Announce someone's stream (manually)")
+    @commands.slash_command(name="announce_stream", description="Announce someone's stream (manually)")
     async def announce_stream(self, user: Member, inter: ApplicationCommandInteraction):
         try:
             await inter.response.send_message("Sending...", ephemeral=True)

@@ -1,7 +1,6 @@
 import random
 from disnake import ApplicationCommandInteraction, Member
 from disnake.ext import commands
-from config import Configuration
 import logging
 from logging.handlers import RotatingFileHandler
 import os
@@ -95,7 +94,6 @@ class Anonymous(commands.Cog):
     #         )
     
     @commands.slash_command(
-        guild_ids=[Configuration.instance().GUILD_ID],
         name="send_anonymous_channel_message",
         description="Post an anonymous message in this channel."
     )
@@ -172,7 +170,6 @@ class Anonymous(commands.Cog):
             )
             
     @commands.slash_command(
-        guild_ids=[Configuration.instance().GUILD_ID],
         name="anon_last5",
         description="Show the last 5 anonymous messages (admin only).",
     )

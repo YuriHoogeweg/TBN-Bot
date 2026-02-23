@@ -2,7 +2,6 @@ from disnake import ChannelType, Member, ApplicationCommandInteraction, VoiceSta
 from disnake.ext import commands
 from disnake.abc import GuildChannel
 import humanize
-from config import Configuration
 from datetime import datetime
 from database.tbnbotdatabase import JoinTime, database_session
 
@@ -12,7 +11,7 @@ class JoinTimeCog(commands.Cog):
         self.bot = bot
         self.db_session = database_session()
 
-    @commands.slash_command(guild_ids=[Configuration.instance().GUILD_ID], name="reset_jointimes", description="Reset a channel's join times")
+    @commands.slash_command(name="reset_jointimes", description="Reset a channel's join times")
     @commands.default_member_permissions(manage_guild=True)
     async def reset_jointimes(self, inter: ApplicationCommandInteraction, channel: GuildChannel = None):
         channel = channel or (
@@ -26,7 +25,7 @@ class JoinTimeCog(commands.Cog):
             JoinTime.channel_id == channel.id).delete()
         await inter.response.send_message(f"Jointimes for {channel.name} reset.", ephemeral=True)
 
-    @commands.slash_command(guild_ids=[Configuration.instance().GUILD_ID], name="jointimes", description="Show who has been in a channel the longest")
+    @commands.slash_command(name="jointimes", description="Show who has been in a channel the longest")
     async def jointimes(self, inter: ApplicationCommandInteraction, channel: GuildChannel = None):
         channel = channel or (inter.author.voice.channel if inter.author.voice is not None else None)
 

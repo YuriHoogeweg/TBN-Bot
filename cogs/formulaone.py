@@ -2,16 +2,14 @@ import fastf1
 import pytz
 from disnake import Embed, ApplicationCommandInteraction
 from disnake.ext import commands
-from config import Configuration
-from datetime import datetime   
+from datetime import datetime
 import calendar
 
 class FormulaOne(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    # Register as slash command - pass in Guild ID so command changes propagate immediately
-    @commands.slash_command(guild_ids=[Configuration.instance().GUILD_ID], name="schedule", description="Check the F1 schedule for the upcoming race weekend.")
+    @commands.slash_command(name="schedule", description="Check the F1 schedule for the upcoming race weekend.")
     async def schedule(self, interaction: ApplicationCommandInteraction):
         # The sessions object keeps the original index while removing the past races, hence we have to 
         # iterate through the past races indexes until it hits the first accessible event object

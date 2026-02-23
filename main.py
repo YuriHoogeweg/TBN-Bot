@@ -32,7 +32,7 @@ intents.members = True
 intents.message_content = True
 
 # Create a Bot instance. This bot client is our connection to Discord.
-bot = InteractionBot(intents=intents)
+bot = InteractionBot(intents=intents, test_guilds=Configuration.instance().GUILD_IDS)
 
 # Load cogs here
 sand_bot = SandBot(bot)

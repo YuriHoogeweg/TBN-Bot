@@ -7,7 +7,7 @@ class PodcastCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @commands.slash_command(guild_ids=[Configuration.instance().GUILD_ID], name="podcast_reset", description="Remove all podcast participants")
+    @commands.slash_command(name="podcast_reset", description="Remove all podcast participants")
     async def podcast_reset(self, inter: ApplicationCommandInteraction):
         role = inter.guild.get_role(Configuration.instance().PODCAST_PARTICIPANT_ROLE_ID)
 
@@ -19,7 +19,7 @@ class PodcastCog(commands.Cog):
         await inter.response.send_message("Removed all other podcast participants.", ephemeral=True,
                                           components=[disnake.ui.Button(style=disnake.ButtonStyle.green, label="Hide podcast channel", custom_id="podcast_hide")])
 
-    @commands.slash_command(guild_ids=[Configuration.instance().GUILD_ID], name="podcast_addparticipants", description="Add podcast participants")
+    @commands.slash_command(name="podcast_addparticipants", description="Add podcast participants")
     async def podcast_addparticipants(self, inter: ApplicationCommandInteraction, participant1: Member, participant2: Member = None, participant3: Member = None, participant4: Member = None):
         all_participants = [participant1,
                             participant2, participant3, participant4]
@@ -34,7 +34,7 @@ class PodcastCog(commands.Cog):
                                           ephemeral=True,
                                           components=[disnake.ui.Button(style=disnake.ButtonStyle.green, label="Reveal podcast channel", custom_id="podcast_reveal")])
 
-    @commands.slash_command(guild_ids=[Configuration.instance().GUILD_ID], name="podcast_revealchannel", description="Reveal podcast channel")
+    @commands.slash_command(name="podcast_revealchannel", description="Reveal podcast channel")
     async def podcast_revealchannel(self, inter: ApplicationCommandInteraction):
         social_channel = self.bot.get_channel(
             Configuration.instance().SOCIAL_CATEGORY_ID)
@@ -45,7 +45,7 @@ class PodcastCog(commands.Cog):
         await podcast_channel.move(end=True, category=social_channel)
         await inter.response.send_message("Moved podcast channel to troop category", ephemeral=True)
 
-    @commands.slash_command(guild_ids=[Configuration.instance().GUILD_ID], name="podcast_hidechannel", description="Hide podcast channel")
+    @commands.slash_command(name="podcast_hidechannel", description="Hide podcast channel")
     async def podcast_hidechannel(self, inter: ApplicationCommandInteraction):
         archive_channel = self.bot.get_channel(Configuration.instance().ARCHIVE_CATEGORY_ID)
         podcast_channel = self.bot.get_channel(Configuration.instance().PODCAST_CHANNEL_ID)

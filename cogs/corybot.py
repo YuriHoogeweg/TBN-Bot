@@ -2,7 +2,6 @@ from disnake import ApplicationCommandInteraction
 import disnake
 from disnake.ext import commands
 from cogs.shared.chatcompletion_cog import ChatCompletionCog
-from config import Configuration
 
 
 class CoryBot(ChatCompletionCog):
@@ -32,8 +31,7 @@ class CoryBot(ChatCompletionCog):
         self.set_message_context("", user_messages, assistant_messages)
         super().__init__("Cory", bot)
 
-    # Register as slash command - pass in Guild ID so command changes propagate immediately
-    @commands.slash_command(guild_ids=[Configuration.instance().GUILD_ID])
+    @commands.slash_command()
     async def cory(self, interaction: ApplicationCommandInteraction, message: str, llm: str = commands.Param(
             default="openai",
             choices=["openai", "grok"],
@@ -56,7 +54,7 @@ class CoryBot(ChatCompletionCog):
 
         await interaction.followup.send(f"{interaction.author.mention}: {message}\n\n**Cory ({llm}):** {response}")
 
-    @commands.slash_command(guild_ids=[Configuration.instance().GUILD_ID])
+    @commands.slash_command()
     async def corys_thoughts(self, interaction: ApplicationCommandInteraction, num_message_context: int = 5, context_last_message_id: str = None):
         """
         Get cory's thoughts on the conversation.
