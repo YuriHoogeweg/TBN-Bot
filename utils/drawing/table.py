@@ -100,7 +100,7 @@ class ImageCell(Cell):
         if not self.image:
             return image, draw  # no image, so this is basically an empty cell
         actual_image = self.image.resize(
-            (self.width - (self.padding[1] + self.padding[3]), self.height - (self.padding[0] + self.padding[2])), Image.ANTIALIAS)
+            (self.width - (self.padding[1] + self.padding[3]), self.height - (self.padding[0] + self.padding[2])), Image.LANCZOS)
         image = paste_image(image, actual_image, x +
                             self.padding[3], y + self.padding[0])
         draw = ImageDraw.Draw(image)

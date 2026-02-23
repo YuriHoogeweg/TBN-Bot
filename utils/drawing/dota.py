@@ -114,7 +114,7 @@ async def get_item_image(item_id):
 async def draw_courage(hero_id, icon_ids):
     # scaled to 128 height
     hero_image = await get_hero_portrait(hero_id)
-    hero_image = hero_image.resize((97, 128), Image.ANTIALIAS)
+    hero_image = hero_image.resize((97, 128), Image.LANCZOS)
 
     table = Table(background="#000000")
     table.add_row([
