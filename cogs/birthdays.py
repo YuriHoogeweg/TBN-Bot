@@ -170,7 +170,11 @@ class Birthdays(ChatCompletionCog):
 
     @commands.slash_command(name="removebirthday", description="Remove your birthday.")
     async def remove_birthday(self, interaction: ApplicationCommandInteraction):
-        self.db_session.query(TbnMember).filter(TbnMember.id == interaction.author.id).first().birthday = None
+        member = self.db_session.query(TbnMember).filter(TbnMember.id == interaction.author.id).first()
+        if not member or not member.birthday:
+            await interaction.response.send_message("You don't have a birthday set.", ephemeral=True)
+            return
+        member.birthday = None
         self.db_session.commit()
 
         await interaction.response.send_message(f"{interaction.author.mention}, your birthday has been removed.", ephemeral=True)
@@ -178,6 +182,9 @@ class Birthdays(ChatCompletionCog):
     @commands.slash_command(name="showbirthday", description="Show your birthday, just in case you forgot.")
     async def show_birthday(self, interaction: ApplicationCommandInteraction):
         birthday_boi = self.db_session.query(TbnMember).filter(TbnMember.id == interaction.author.id).first()
+        if not birthday_boi or not birthday_boi.birthday:
+            await interaction.response.send_message("You haven't set a birthday yet. Use /setbirthday to register one.", ephemeral=True)
+            return
         birthday_output_format = "%B %d"  # Month Day format
         await interaction.response.send_message(f"{interaction.author.mention}, your birthday is registered as {birthday_boi.birthday.strftime(birthday_output_format)}", ephemeral=True)
     
@@ -190,9 +197,10 @@ class Birthdays(ChatCompletionCog):
 
     @tasks.loop(time=time(hour=7, minute=0, tzinfo=timezone.utc), count=None, reconnect=True)
     async def notify_birthdays(self):
+        today = datetime.now(timezone.utc)
         birthday_bois = self.db_session.query(TbnMember)\
-            .filter(extract('month', TbnMember.birthday) == datetime.now().month)\
-            .filter(extract('day', TbnMember.birthday) == datetime.now().day)\
+            .filter(extract('month', TbnMember.birthday) == today.month)\
+            .filter(extract('day', TbnMember.birthday) == today.day)\
             .all()
             
         if len(birthday_bois) < 1: 
@@ -213,7 +221,7 @@ class Birthdays(ChatCompletionCog):
     @tasks.loop(time=time(hour=1, minute=0, second=0, tzinfo=timezone.utc), count=None, reconnect=True)
     async def manage_birthday_roles(self):
         birthday_role_id = Configuration.instance().BIRTHDAY_ROLE_ID
-        today = datetime.now().date()
+        today = datetime.now(timezone.utc).date()
 
         for guild in self.bot.guilds:
             birthday_role = guild.get_role(birthday_role_id)
@@ -245,6 +253,10 @@ class Birthdays(ChatCompletionCog):
                         logger.error(f"Failed to add birthday role to {member.name} (ID: {member.id}) in {guild.name}: {e}")
                 else:
                     logger.warning(f"Member with ID {db_member.id} not found in guild {guild.name} (ID: {guild.id})")
+
+    @notify_birthdays.before_loop
+    async def before_notify_birthdays(self):
+        await self.bot.wait_until_ready()
 
     @manage_birthday_roles.before_loop
     async def before_manage_birthday_roles(self):
