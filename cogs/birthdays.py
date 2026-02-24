@@ -46,7 +46,7 @@ class Birthdays(ChatCompletionCog):
 
     def cog_unload(self):
         self.notify_birthdays.cancel()
-        self.clear_birthday_roles.cancel()
+        self.manage_birthday_roles.cancel()
 
     @commands.slash_command(
         name="setbirthday",
