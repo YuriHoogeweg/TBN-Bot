@@ -322,3 +322,115 @@ class DotaScout(commands.Cog):
 
         content = "\n".join(errors) if errors else None
         await interaction.followup.send(content=content, file=disnake.File(fp, filename="scout_team.png"))
+
+    @commands.slash_command(
+        description="Scout all players on one side of a Dota 2 match.",
+    )
+    async def scout_match(
+        self,
+        interaction: ApplicationCommandInteraction,
+        match_id: str,
+        side: str = commands.Param(choices=["radiant", "dire"]),
+        date: str = commands.Param(default="3month", choices=["3month", "6month", "year"]),
+    ):
+        """
+        Parameters
+        ----------
+        match_id: Dota 2 match ID.
+        side: Which team to scout — Radiant or Dire.
+        date: How far back to look — 3 months, 6 months, or 1 year.
+        """
+        await interaction.response.defer()
+
+        try:
+            mid = int(match_id)
+        except ValueError:
+            await interaction.followup.send("Invalid match ID.", ephemeral=True)
+            return
+
+        async with aiohttp.ClientSession() as session:
+            try:
+                match_data, all_heroes = await asyncio.gather(
+                    _get_json(session, f"{OPENDOTA_BASE}/matches/{mid}"),
+                    _get_json(session, f"{OPENDOTA_BASE}/heroes"),
+                )
+            except aiohttp.ClientResponseError as e:
+                if e.status == 404:
+                    await interaction.followup.send("Match not found.", ephemeral=True)
+                else:
+                    await interaction.followup.send(
+                        f"OpenDota API error (HTTP {e.status}). Try again later.", ephemeral=True
+                    )
+                return
+            except Exception as e:
+                await interaction.followup.send(f"Failed to fetch match data: {e}", ephemeral=True)
+                return
+
+            players = match_data.get("players", [])
+            if side == "radiant":
+                team_players = [p for p in players if p.get("player_slot", 128) < 128]
+            else:
+                team_players = [p for p in players if p.get("player_slot", 0) >= 128]
+
+            steam32_ids = [p["account_id"] for p in team_players if p.get("account_id")]
+
+            if not steam32_ids:
+                await interaction.followup.send(
+                    "No public player accounts found on that side.", ephemeral=True
+                )
+                return
+
+            hero_lookup = _make_hero_lookup(all_heroes)
+            days = DATE_TO_DAYS[date]
+
+            per_player_tasks = [
+                asyncio.gather(
+                    _get_json(session, f"{OPENDOTA_BASE}/players/{s32}"),
+                    _get_json(session, f"{OPENDOTA_BASE}/players/{s32}/heroes?date={days}"),
+                )
+                for s32 in steam32_ids
+            ]
+            player_results = await asyncio.gather(*per_player_tasks, return_exceptions=True)
+
+        canvases = []
+        errors = []
+        for i, (s32, result) in enumerate(zip(steam32_ids, player_results), start=1):
+            if isinstance(result, Exception):
+                errors.append(f"Player {i} (`{s32}`): {result}")
+                continue
+
+            profile, player_heroes_raw = result
+            player_name = (profile.get("profile") or {}).get("personaname") or str(s32)
+
+            if not player_heroes_raw:
+                errors.append(f"**{player_name}**: no hero data for this period (profile may be private)")
+                continue
+
+            heroes = _build_heroes(player_heroes_raw, hero_lookup)
+            if not heroes:
+                errors.append(f"**{player_name}**: no hero data for this period")
+                continue
+
+            canvas = await _build_scout_canvas(heroes, player_name=player_name)
+            canvases.append(canvas)
+
+        if not canvases:
+            await interaction.followup.send(
+                "No hero data found for any players.\n" + "\n".join(errors), ephemeral=True
+            )
+            return
+
+        max_w = max(c.size[0] for c in canvases)
+        total_h = sum(c.size[1] for c in canvases) + ROW_GAP * (len(canvases) - 1)
+        composite = Image.new("RGB", (max_w, total_h), BG_COLOR)
+        y = 0
+        for canvas in canvases:
+            composite.paste(canvas, (0, y))
+            y += canvas.size[1] + ROW_GAP
+
+        fp = BytesIO()
+        composite.save(fp, format="PNG")
+        fp.seek(0)
+
+        content = "\n".join(errors) if errors else None
+        await interaction.followup.send(content=content, file=disnake.File(fp, filename="scout_match.png"))
