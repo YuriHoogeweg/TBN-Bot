@@ -153,6 +153,7 @@ class DotaScout(commands.Cog):
         interaction: ApplicationCommandInteraction,
         player_id: str,
         date: str = commands.Param(default="3month", choices=["3month", "6month", "year"]),
+        ninja_mode: bool = commands.Param(default=False, description="Only show the result to you"),
     ):
         """
         Scout a player's top 10 most played Dota 2 heroes.
@@ -161,7 +162,7 @@ class DotaScout(commands.Cog):
         player_id: Steam32 or Steam64 player ID (visible in your Dotabuff/OpenDota URL).
         date: How far back to look — 3 months, 6 months, or 1 year.
         """
-        await interaction.response.defer()
+        await interaction.response.defer(ephemeral=ninja_mode)
 
         try:
             steam32 = convert_to_steam32(int(player_id))
@@ -215,7 +216,7 @@ class DotaScout(commands.Cog):
             return
 
         image_fp = await generate_scout_image(heroes)
-        await interaction.followup.send(file=disnake.File(image_fp, filename="scout.png"))
+        await interaction.followup.send(file=disnake.File(image_fp, filename="scout.png"), ephemeral=ninja_mode)
 
     @commands.slash_command(
         description="Scout up to 5 players' hero pools side-by-side (one image per player).",
@@ -229,6 +230,7 @@ class DotaScout(commands.Cog):
         player_id_4: str = None,
         player_id_5: str = None,
         date: str = commands.Param(default="3month", choices=["3month", "6month", "year"]),
+        ninja_mode: bool = commands.Param(default=False, description="Only show the result to you"),
     ):
         """
         Scout up to 5 players' top 10 most played Dota 2 heroes.
@@ -241,7 +243,7 @@ class DotaScout(commands.Cog):
         player_id_5: Steam32 or Steam64 player ID (optional).
         date: How far back to look — 3 months, 6 months, or 1 year.
         """
-        await interaction.response.defer()
+        await interaction.response.defer(ephemeral=ninja_mode)
 
         raw_ids = [player_id_1, player_id_2, player_id_3, player_id_4, player_id_5]
         steam32_ids = []
@@ -321,7 +323,7 @@ class DotaScout(commands.Cog):
         fp.seek(0)
 
         content = "\n".join(errors) if errors else None
-        await interaction.followup.send(content=content, file=disnake.File(fp, filename="scout_team.png"))
+        await interaction.followup.send(content=content, file=disnake.File(fp, filename="scout_team.png"), ephemeral=ninja_mode)
 
     @commands.slash_command(
         description="Scout all players on one side of a Dota 2 match.",
@@ -332,6 +334,7 @@ class DotaScout(commands.Cog):
         match_id: str,
         side: str = commands.Param(choices=["radiant", "dire"]),
         date: str = commands.Param(default="3month", choices=["3month", "6month", "year"]),
+        ninja_mode: bool = commands.Param(default=False, description="Only show the result to you"),
     ):
         """
         Parameters
@@ -340,7 +343,7 @@ class DotaScout(commands.Cog):
         side: Which team to scout — Radiant or Dire.
         date: How far back to look — 3 months, 6 months, or 1 year.
         """
-        await interaction.response.defer()
+        await interaction.response.defer(ephemeral=ninja_mode)
 
         try:
             mid = int(match_id)
@@ -433,4 +436,4 @@ class DotaScout(commands.Cog):
         fp.seek(0)
 
         content = "\n".join(errors) if errors else None
-        await interaction.followup.send(content=content, file=disnake.File(fp, filename="scout_match.png"))
+        await interaction.followup.send(content=content, file=disnake.File(fp, filename="scout_match.png"), ephemeral=ninja_mode)
