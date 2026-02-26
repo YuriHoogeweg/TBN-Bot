@@ -177,7 +177,8 @@ class DotaScout(commands.Cog):
 
         async with aiohttp.ClientSession() as session:
             try:
-                player_heroes, all_heroes = await asyncio.gather(
+                profile, player_heroes, all_heroes = await asyncio.gather(
+                    _get_json(session, f"{OPENDOTA_BASE}/players/{steam32}"),
                     _get_json(session, f"{OPENDOTA_BASE}/players/{steam32}/heroes?date={days}"),
                     _get_json(session, f"{OPENDOTA_BASE}/heroes"),
                 )
@@ -199,6 +200,7 @@ class DotaScout(commands.Cog):
                 return
 
         hero_lookup = _make_hero_lookup(all_heroes)
+        player_name = (profile.get("profile") or {}).get("personaname") or str(steam32)
 
         if not player_heroes:
             await interaction.followup.send(
@@ -215,7 +217,7 @@ class DotaScout(commands.Cog):
             )
             return
 
-        image_fp = await generate_scout_image(heroes)
+        image_fp = await generate_scout_image(heroes, player_name)
         await interaction.followup.send(file=disnake.File(image_fp, filename="scout.png"), ephemeral=ninja_mode)
 
     @commands.slash_command(
