@@ -32,9 +32,13 @@ NAME_ROW_H = 20  # header row height when player_name is shown
 ROW_GAP = 4      # vertical gap between player rows in the team composite
 
 DATE_TO_DAYS = {
+    "1week":  7,
+    "2week":  14,
+    "1month": 30,
+    "2month": 60,
     "3month": 90,
     "6month": 180,
-    "year": 365,
+    "year":   365,
 }
 
 
@@ -152,7 +156,7 @@ class DotaScout(commands.Cog):
         self,
         interaction: ApplicationCommandInteraction,
         player_id: str,
-        date: str = commands.Param(default="3month", choices=["3month", "6month", "year"]),
+        date: str = commands.Param(default="3month", choices=["1week", "2week", "1month", "2month", "3month", "6month", "year"]),
         ninja_mode: bool = commands.Param(default=False, description="Only show the result to you"),
     ):
         """
@@ -160,7 +164,7 @@ class DotaScout(commands.Cog):
         Parameters
         ----------
         player_id: Steam32 or Steam64 player ID (visible in your Dotabuff/OpenDota URL).
-        date: How far back to look — 3 months, 6 months, or 1 year.
+        date: How far back to look — 1 week, 2 weeks, 1 month, 2 months, 3 months, 6 months, or 1 year.
         """
         await interaction.response.defer(ephemeral=ninja_mode)
 
@@ -231,7 +235,7 @@ class DotaScout(commands.Cog):
         player_id_3: str = None,
         player_id_4: str = None,
         player_id_5: str = None,
-        date: str = commands.Param(default="3month", choices=["3month", "6month", "year"]),
+        date: str = commands.Param(default="3month", choices=["1week", "2week", "1month", "2month", "3month", "6month", "year"]),
         ninja_mode: bool = commands.Param(default=False, description="Only show the result to you"),
     ):
         """
@@ -243,7 +247,7 @@ class DotaScout(commands.Cog):
         player_id_3: Steam32 or Steam64 player ID (optional).
         player_id_4: Steam32 or Steam64 player ID (optional).
         player_id_5: Steam32 or Steam64 player ID (optional).
-        date: How far back to look — 3 months, 6 months, or 1 year.
+        date: How far back to look — 1 week, 2 weeks, 1 month, 2 months, 3 months, 6 months, or 1 year.
         """
         await interaction.response.defer(ephemeral=ninja_mode)
 
@@ -335,7 +339,7 @@ class DotaScout(commands.Cog):
         interaction: ApplicationCommandInteraction,
         match_id: str,
         side: str = commands.Param(choices=["radiant", "dire"]),
-        date: str = commands.Param(default="3month", choices=["3month", "6month", "year"]),
+        date: str = commands.Param(default="3month", choices=["1week", "2week", "1month", "2month", "3month", "6month", "year"]),
         ninja_mode: bool = commands.Param(default=False, description="Only show the result to you"),
     ):
         """
@@ -343,7 +347,7 @@ class DotaScout(commands.Cog):
         ----------
         match_id: Dota 2 match ID.
         side: Which team to scout — Radiant or Dire.
-        date: How far back to look — 3 months, 6 months, or 1 year.
+        date: How far back to look — 1 week, 2 weeks, 1 month, 2 months, 3 months, 6 months, or 1 year.
         """
         await interaction.response.defer(ephemeral=ninja_mode)
 
