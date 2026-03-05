@@ -11,7 +11,6 @@ from cogs.birthdays import Birthdays
 from cogs.sandbot import SandBot
 from cogs.formulaone import FormulaOne
 from cogs.jointime import JoinTimeCog
-from cogs.podcast import PodcastCog
 from cogs.naughtylist import NaughtyListCog
 from cogs.embedvideo import EmbedVideo
 from config import Configuration
@@ -46,7 +45,6 @@ bot.add_cog(Birthdays(bot))
 bot.add_cog(FormulaOne(bot))
 bot.add_cog(JoinTimeCog(bot))
 bot.add_cog(EmbedVideo(bot))
-bot.add_cog(PodcastCog(bot))
 bot.add_cog(NaughtyListCog(bot))
 bot.add_cog(Anonymous(bot))
 bot.add_cog(DotaScout(bot))

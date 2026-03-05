@@ -1,4 +1,3 @@
-import time
 from disnake import ApplicationCommandInteraction
 import disnake
 from disnake.ext import commands, tasks
@@ -216,7 +215,11 @@ class Birthdays(ChatCompletionCog):
                 else f'Good morning gang, we have _multiple_ birthdays today! Happy birthday to {", ".join([f"<@!{member.id}>" for member in birthday_bois])}! :partying_face: :birthday: :partying_face:'
             )
 
-        await self.bot.get_channel(Configuration.instance().BIRTHDAYS_CHANNEL_ID).send(announcement + "\n\n_Use the /setbirthday command to register your own birthday for future announcements_")
+        channel = self.bot.get_channel(Configuration.instance().BIRTHDAYS_CHANNEL_ID)
+        if channel is None:
+            logger.error(f"Birthday announcement channel not found (ID: {Configuration.instance().BIRTHDAYS_CHANNEL_ID})")
+            return
+        await channel.send(announcement + "\n\n_Use the /setbirthday command to register your own birthday for future announcements_")
 
     @tasks.loop(time=time(hour=1, minute=0, second=0, tzinfo=timezone.utc), count=None, reconnect=True)
     async def manage_birthday_roles(self):
