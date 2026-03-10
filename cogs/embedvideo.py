@@ -107,7 +107,7 @@ class EmbedVideo(commands.Cog):
         if inter.author.bot:
             return
 
-        await inter.response.defer(ephemeral=True)
+        await inter.response.defer()
         
         # Saving this here for later, not really necessary right now
         # ----------------------------------------------------------
@@ -159,9 +159,7 @@ class EmbedVideo(commands.Cog):
                     content="Failed to download any videos from the provided URL(s)."
                 )
             else:
-                await inter.edit_original_response(
-                    content="Here is the embedded video!"
-                )
+                await inter.delete_original_response()
 
 
 def setup(bot: commands.Bot):
