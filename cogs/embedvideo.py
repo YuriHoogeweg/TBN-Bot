@@ -97,18 +97,18 @@ class EmbedVideo(commands.Cog):
 
     @commands.slash_command(
         name="embed_video",
-        description="Embeds Reddit or Instagram video to message"
+        description="Downloads and embeds a video from a URL (e.g. Instagram, Reddit, Facebook)"
     )
     async def embed_video(
         self,
         inter: ApplicationCommandInteraction,
-        url: str,
+        url: str = commands.Param(description="The video URL to download and embed"),
     ):
         if inter.author.bot:
             return
 
         await inter.response.defer()
-        
+
         # Saving this here for later, not really necessary right now
         # ----------------------------------------------------------
         # insta_links = INSTAGRAM_REGEX.findall(url)
@@ -122,26 +122,20 @@ class EmbedVideo(commands.Cog):
             )
             return
 
-        await inter.edit_original_response(content="Downloading video, please wait...")
-
-        any_success = False
-
         for link in links:
             file_path = await self.download_video(link)
 
             if file_path:
-                any_success = True
                 try:
-                    await inter.followup.send(
+                    await inter.edit_original_response(
                         content=f"{link}",
                         suppress_embeds=True,
-                        file=disnake.File(file_path)
+                        file=disnake.File(file_path),
                     )
                 except Exception as e:
                     print(f"[embed_video] Failed to send file: {e}")
-                    await inter.followup.send(
+                    await inter.edit_original_response(
                         content=f"Downloaded the video for {link}, but failed to send it to Discord.",
-                        ephemeral=True,
                     )
                 finally:
                     try:
@@ -149,17 +143,9 @@ class EmbedVideo(commands.Cog):
                     except FileNotFoundError:
                         pass
             else:
-                await inter.followup.send(
-                    content=f"Could not download video from: {link} (it might still be processing or too large).",
-                    ephemeral=True,
-                )
-
-            if not any_success:
                 await inter.edit_original_response(
-                    content="Failed to download any videos from the provided URL(s)."
+                    content=f"Could not download video from: {link} (it might still be processing or too large).",
                 )
-            else:
-                await inter.delete_original_response()
 
 
 def setup(bot: commands.Bot):
