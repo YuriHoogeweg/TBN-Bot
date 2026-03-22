@@ -13,7 +13,7 @@ class Configuration:
 
             # Read config variables from config.ini
             config = ConfigParser()
-            config.read('config.ini')
+            config.read('devconfig.ini')
             cls._instance.GUILD_IDS = [int(x.strip()) for x in config['discord']['GUILD_IDS'].split(',')]
             cls._instance.CLIENT_ID = int(config['discord']['CLIENT_ID'])
             cls._instance.TOKEN = config['discord']['TOKEN']
@@ -35,4 +35,5 @@ class Configuration:
             
             cls._instance.OPENAI_KEY = config['openai']['KEY']
             cls._instance.GROK_KEY = config['grok']['KEY']
+            cls._instance.OPENDOTA_KEY = config.get('opendota', 'KEY', fallback='').strip()
         return cls._instance
