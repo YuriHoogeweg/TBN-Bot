@@ -40,22 +40,35 @@ class StreamAnnouncer(commands.Cog):
             await self._announce_stream_internal(user)
         except Exception as e:
             logging.error(f"Error announcing stream: {str(e)}", exc_info=True)
+
+    @commands.slash_command(name="announce_stream_manual", description="Announce a stream for a user who hasn't linked Twitch to Discord")
+    async def announce_stream_manual(self, inter: ApplicationCommandInteraction, user: Member, url: str, game: str = None, title: str = None):
+        try:
+            await inter.response.send_message("Sending...", ephemeral=True)
+            await self._announce_stream_internal(user, url=url, game=game, title=title)
+        except Exception as e:
+            logging.error(f"Error announcing stream manually: {str(e)}", exc_info=True)
     
-    async def _announce_stream_internal(self, user: Member):
+    async def _announce_stream_internal(self, user: Member, url: str = None, game: str = None, title: str = None):
         try:
             placeholder_replacements = {"%username%": "TBN"}
             chatbot = random.choice(self.chat_bots)
-            
+
             streaming = self._get_streaming_activity(user)
-            game = getattr(streaming, "game", None) or getattr(streaming, "details", None) or "their game"
-            title = getattr(streaming, "name", None) or getattr(streaming, "details", None) or "Live now"
-            
+            resolved_url = url or getattr(streaming, "url", None)
+            resolved_game = game or getattr(streaming, "game", None) or getattr(streaming, "details", None) or "their game"
+            resolved_title = title or getattr(streaming, "name", None) or getattr(streaming, "details", None) or "Live now"
+
+            if not resolved_url:
+                logging.error(f"Cannot announce stream for {user.display_name}: no URL available")
+                return
+
             chatbot_message = f"""Our mutual friend {user.display_name} just started streaming, could you write an announcement to share and promote their stream to our Discord server called The Biscuit Network (TBN)?
-                The game they're streaming is `{game}`, their stream title is `{title}` and the URL to their stream is `{streaming.url}`.
+                The game they're streaming is `{resolved_game}`, their stream title is `{resolved_title}` and the URL to their stream is `{resolved_url}`.
                 Incorporate the Discord server's name, their name, game, stream title and URL in your announcement, include the URL exactly as provided and do not alter it in any way! Tell me only the announcement, nothing else"""
-            
+
             response = await chatbot.get_response(chatbot_message, placeholder_replacements, "openai")
-            sanitized = sanitize_url_in_text(response, streaming.url)
+            sanitized = sanitize_url_in_text(response, resolved_url)
             
             message_heading = f"# Content Alert <@&{self.bambeaner_role_Id}>!" if user.id == self.bambo_user_id else f"# Content Alert!" 
             message = f"{message_heading}\n**{chatbot.name}:** {sanitized}"
