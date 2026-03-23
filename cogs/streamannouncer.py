@@ -34,7 +34,7 @@ class StreamAnnouncer(commands.Cog):
             logging.error(f"Error in on_presence_update: {str(e)}", exc_info=True)
             
     @commands.slash_command(name="announce_stream", description="Announce someone's stream (manually)")
-    async def announce_stream(self, user: Member, inter: ApplicationCommandInteraction):
+    async def announce_stream(self, inter: ApplicationCommandInteraction, user: Member = commands.Param(description="The member whose stream to announce")):
         try:
             await inter.response.send_message("Sending...", ephemeral=True)
             await self._announce_stream_internal(user)
@@ -42,7 +42,12 @@ class StreamAnnouncer(commands.Cog):
             logging.error(f"Error announcing stream: {str(e)}", exc_info=True)
 
     @commands.slash_command(name="announce_stream_manual", description="Announce a stream for a user who hasn't linked Twitch to Discord")
-    async def announce_stream_manual(self, inter: ApplicationCommandInteraction, user: Member, url: str, game: str = None, title: str = None):
+    async def announce_stream_manual(self,
+                                     inter: ApplicationCommandInteraction,
+                                     user: Member = commands.Param(description="The member to announce the stream for"),
+                                     url: str = commands.Param(description="The Twitch stream URL"),
+                                     game: str = commands.Param(default=None, description="The game being streamed"),
+                                     title: str = commands.Param(default=None, description="The stream title")):
         try:
             await inter.response.send_message("Sending...", ephemeral=True)
             await self._announce_stream_internal(user, url=url, game=game, title=title)
