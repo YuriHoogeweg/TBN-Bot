@@ -72,11 +72,16 @@ class StreamAnnouncer(commands.Cog):
                 The game they're streaming is `{resolved_game}`, their stream title is `{resolved_title}` and the URL to their stream is `{resolved_url}`.
                 Incorporate the Discord server's name, their name, game, stream title and URL in your announcement, include the URL exactly as provided and do not alter it in any way! Tell me only the announcement, nothing else"""
 
-            response = await chatbot.get_response(chatbot_message, placeholder_replacements, "openai")
-            sanitized = sanitize_url_in_text(response, resolved_url)
-            
-            message_heading = f"# Content Alert <@&{self.bambeaner_role_Id}>!" if user.id == self.bambo_user_id else f"# Content Alert!" 
-            message = f"{message_heading}\n**{chatbot.name}:** {sanitized}"
+            try:
+                response = await chatbot.get_response(chatbot_message, placeholder_replacements, "openai")
+                sanitized = sanitize_url_in_text(response, resolved_url)
+                bot_line = f"**{chatbot.name}:** {sanitized}"
+            except Exception as ai_error:
+                logging.warning(f"AI announcement failed for {user.display_name}, using fallback: {ai_error}")
+                bot_line = f"{user.display_name} is live on Twitch playing **{resolved_game}**! \"{resolved_title}\" — {resolved_url}"
+
+            message_heading = f"# Content Alert <@&{self.bambeaner_role_Id}>!" if user.id == self.bambo_user_id else f"# Content Alert!"
+            message = f"{message_heading}\n{bot_line}"
             logging.info(f"Stream live announcement: {message}")
             
             await self.send_announcement(message)            
