@@ -14,11 +14,6 @@ from cogs.jointime import JoinTimeCog
 from cogs.naughtylist import NaughtyListCog
 from cogs.embedvideo import EmbedVideo
 from config import Configuration
-import openai
-
-# Set the openai api key
-openai.api_key = Configuration.instance().OPENAI_KEY
-
 # Set intents for the bot here - intents info: https://discord.com/developers/docs/topics/gateway#gateway-intents
 intents = disnake.Intents.default()
 intents.members = True

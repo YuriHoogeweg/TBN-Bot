@@ -6,7 +6,7 @@ import time
 from types import SimpleNamespace
 from typing import List
 from disnake.ext import commands
-import openai
+from openai import OpenAI
 import copy
 
 from retry import retry
@@ -16,19 +16,18 @@ from config import Configuration
 
 class ChatCompletionCog(commands.Cog):
     def __init__(self, name: str, bot: commands.Bot):
-        self.bot = bot    
+        self.bot = bot
         self.name = name
-        
+
+        config = Configuration.instance()
         self.configs = {
             "openai": SimpleNamespace(
-                api_key=Configuration.instance().OPENAI_KEY,
-                base_url=openai.api_base,
-                default_model="gpt-4o-mini"
+                client=OpenAI(api_key=config.OPENAI_KEY),
+                default_model="gpt-5.4-mini"
             ),
             "grok": SimpleNamespace(
-                api_key=Configuration.instance().GROK_KEY,
-                base_url="https://api.x.ai/v1",
-                default_model="grok-4.1-fast"
+                client=OpenAI(api_key=config.GROK_KEY, base_url="https://api.x.ai/v1"),
+                default_model="grok-4-1-fast-non-reasoning"
             )
         }
 
@@ -65,22 +64,16 @@ class ChatCompletionCog(commands.Cog):
     
     @retry(tries=3, delay=5, backoff=5, logger=logging.getLogger(__name__))
     def __call_openai(self, messages) -> str:
-        openai.api_key = self.configs["openai"].api_key
-        openai.api_base = self.configs["openai"].base_url
-        completion = openai.ChatCompletion.create(
-            model="gpt-4o-mini",
+        completion = self.configs["openai"].client.chat.completions.create(
+            model=self.configs["openai"].default_model,
             messages=messages
         )
-
         return completion.choices[0].message.content
-    
+
     def __call_grok(self, messages) -> str:
         model = self.configs["grok"].default_model
         logging.info(f"Calling Grok API (model={model})")
-        openai.api_key = self.configs["grok"].api_key
-        openai.api_base = self.configs["grok"].base_url
-
-        completion = openai.ChatCompletion.create(
+        completion = self.configs["grok"].client.chat.completions.create(
             model=model,
             messages=messages
         )
