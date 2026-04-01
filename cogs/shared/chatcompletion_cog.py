@@ -1,3 +1,4 @@
+import asyncio
 from datetime import datetime
 from itertools import product
 import logging
@@ -27,7 +28,7 @@ class ChatCompletionCog(commands.Cog):
             "grok": SimpleNamespace(
                 api_key=Configuration.instance().GROK_KEY,
                 base_url="https://api.x.ai/v1",
-                default_model="grok-beta"
+                default_model="grok-4.1-fast"
             )
         }
 
@@ -54,9 +55,9 @@ class ChatCompletionCog(commands.Cog):
         messages.append({"role": "user", "content": message})
 
         if (llm == "grok"):
-            response = self.__call_grok(messages)
+            response = await asyncio.to_thread(self.__call_grok, messages)
         else:
-            response = self.__call_openai(messages)
+            response = await asyncio.to_thread(self.__call_openai, messages)
 
         logging.info(f"Input: {message}\n\tResponse: {response}\n")        
         
@@ -74,11 +75,14 @@ class ChatCompletionCog(commands.Cog):
         return completion.choices[0].message.content
     
     def __call_grok(self, messages) -> str:
+        model = self.configs["grok"].default_model
+        logging.info(f"Calling Grok API (model={model})")
         openai.api_key = self.configs["grok"].api_key
         openai.api_base = self.configs["grok"].base_url
 
         completion = openai.ChatCompletion.create(
-            model=self.configs["grok"].default_model,
+            model=model,
             messages=messages
         )
+        logging.info("Grok API call succeeded")
         return completion.choices[0].message.content
