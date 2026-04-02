@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 import logging
 import random
 from typing import Optional
-from disnake import ApplicationCommandInteraction, Member, Streaming, TextChannel
+from disnake import AllowedMentions, ApplicationCommandInteraction, Member, Streaming, TextChannel
 from disnake.ext import commands
 from sqlalchemy import select, update
 from utils.url_sanitizer import sanitize_url_in_text
@@ -37,7 +37,7 @@ class StreamAnnouncer(commands.Cog):
     async def announce_stream(self, inter: ApplicationCommandInteraction, user: Member = commands.Param(description="The member whose stream to announce")):
         try:
             await inter.response.send_message("Sending...", ephemeral=True)
-            await self._announce_stream_internal(user)
+            await self._announce_stream_internal(user, channel=inter.channel)
         except Exception as e:
             logging.error(f"Error announcing stream: {str(e)}", exc_info=True)
 
@@ -50,11 +50,11 @@ class StreamAnnouncer(commands.Cog):
                                      title: str = commands.Param(default=None, description="The stream title")):
         try:
             await inter.response.send_message("Sending...", ephemeral=True)
-            await self._announce_stream_internal(user, url=url, game=game, title=title)
+            await self._announce_stream_internal(user, url=url, game=game, title=title, channel=inter.channel)
         except Exception as e:
             logging.error(f"Error announcing stream manually: {str(e)}", exc_info=True)
     
-    async def _announce_stream_internal(self, user: Member, url: str = None, game: str = None, title: str = None):
+    async def _announce_stream_internal(self, user: Member, url: str = None, game: str = None, title: str = None, channel: TextChannel = None):
         try:
             placeholder_replacements = {"%username%": "TBN"}
             chatbot = random.choice(self.chat_bots)
@@ -84,7 +84,7 @@ class StreamAnnouncer(commands.Cog):
             message = f"{message_heading}\n{bot_line}"
             logging.info(f"Stream live announcement: {message}")
             
-            await self.send_announcement(message)            
+            await self.send_announcement(message, channel=channel)
             
             session = database_session()
             result = session.execute(select(TbnMember).filter(TbnMember.id == user.id))
@@ -102,13 +102,13 @@ class StreamAnnouncer(commands.Cog):
                 return act
         return None
             
-    async def send_announcement(self, message: str):
+    async def send_announcement(self, message: str, channel: TextChannel = None):
         try:
-            channel = self.bot.get_channel(self.announcement_channel_id)
+            channel = channel or self.bot.get_channel(self.announcement_channel_id)
             if not isinstance(channel, TextChannel):
                 logging.error(f"Channel with ID {self.announcement_channel_id} is not a TextChannel or doesn't exist.")
                 return
-            sent_message = await channel.send(message)
+            sent_message = await channel.send(message, allowed_mentions=AllowedMentions(everyone=False, roles=True))
             logging.info(f"Announcement sent successfully. Message ID: {sent_message.id}")
         except Exception as e:
             logging.error(f"Failed to send announcement: {str(e)}", exc_info=True)
