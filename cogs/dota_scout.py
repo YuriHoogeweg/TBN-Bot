@@ -7,10 +7,9 @@ from disnake import ApplicationCommandInteraction
 from disnake.ext import commands
 from PIL import Image, ImageDraw, ImageFont
 
-from config import Configuration
+from utils.opendota import OPENDOTA_BASE, get_json
 from utils.steam import convert_to_steam32
 
-OPENDOTA_BASE = "https://api.opendota.com/api"
 # 256×144 landscape hero images — correct 16:9 aspect ratio, no stretching
 STEAM_CDN = "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes"
 
@@ -69,42 +68,6 @@ def _load_font(size: int) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
         return ImageFont.load_default(size)
 
 
-class _RateLimiter:
-    """Sliding-window rate limiter. Allows `calls` requests per `period` seconds."""
-    def __init__(self, calls: int, period: float):
-        self._sem = asyncio.Semaphore(calls)
-        self._period = period
-
-    async def __aenter__(self):
-        await self._sem.acquire()
-        return self
-
-    async def __aexit__(self, *_):
-        asyncio.get_running_loop().call_later(self._period, self._sem.release)
-
-
-_OPENDOTA_LIMITER: _RateLimiter | None = None
-
-
-def _get_limiter() -> _RateLimiter:
-    global _OPENDOTA_LIMITER
-    if _OPENDOTA_LIMITER is None:
-        key = Configuration.instance().OPENDOTA_KEY
-        _OPENDOTA_LIMITER = _RateLimiter(calls=2950 if key else 55, period=60.0)
-    return _OPENDOTA_LIMITER
-
-
-async def _get_json(session: aiohttp.ClientSession, url: str) -> list | dict:
-    key = Configuration.instance().OPENDOTA_KEY
-    if key:
-        sep = "&" if "?" in url else "?"
-        url = f"{url}{sep}api_key={key}"
-    async with _get_limiter():
-        async with session.get(url, timeout=aiohttp.ClientTimeout(total=15)) as resp:
-            resp.raise_for_status()
-            return await resp.json()
-
-
 async def _fetch_hero_image(
     session: aiohttp.ClientSession, url: str
 ) -> Image.Image | None:
@@ -153,12 +116,12 @@ def _build_heroes(player_heroes_raw: list, hero_lookup: dict) -> list[dict]:
 
 
 async def _fetch_league_matches(session: aiohttp.ClientSession, league_id: int) -> list[dict]:
-    match_id_records = await _get_json(session, f"{OPENDOTA_BASE}/leagues/{league_id}/matchIds")
+    match_id_records = await get_json(session, f"{OPENDOTA_BASE}/leagues/{league_id}/matchIds")
     if not match_id_records:
         return []
     limited = match_id_records[:LEAGUE_MATCH_LIMIT]
     results = await asyncio.gather(
-        *[_get_json(session, f"{OPENDOTA_BASE}/matches/{r}") for r in limited],
+        *[get_json(session, f"{OPENDOTA_BASE}/matches/{r}") for r in limited],
         return_exceptions=True,
     )
     return [r for r in results if isinstance(r, dict)]
@@ -185,7 +148,7 @@ async def _ensure_picks_bans(session: aiohttp.ClientSession, matches: list[dict]
 
     limited = matches[:LEAGUE_MATCH_LIMIT]
     results = await asyncio.gather(
-        *[_get_json(session, f"{OPENDOTA_BASE}/matches/{m['match_id']}") for m in limited],
+        *[get_json(session, f"{OPENDOTA_BASE}/matches/{m['match_id']}") for m in limited],
         return_exceptions=True,
     )
     return [r for r in results if isinstance(r, dict)]
@@ -411,9 +374,9 @@ class DotaScout(commands.Cog):
         async with aiohttp.ClientSession() as session:
             try:
                 profile, player_heroes, all_heroes = await asyncio.gather(
-                    _get_json(session, f"{OPENDOTA_BASE}/players/{steam32}"),
-                    _get_json(session, f"{OPENDOTA_BASE}/players/{steam32}/heroes?date={days}"),
-                    _get_json(session, f"{OPENDOTA_BASE}/heroes"),
+                    get_json(session, f"{OPENDOTA_BASE}/players/{steam32}"),
+                    get_json(session, f"{OPENDOTA_BASE}/players/{steam32}/heroes?date={days}"),
+                    get_json(session, f"{OPENDOTA_BASE}/heroes"),
                 )
             except aiohttp.ClientResponseError as e:
                 if e.status == 404:
@@ -498,7 +461,7 @@ class DotaScout(commands.Cog):
 
         async with aiohttp.ClientSession() as session:
             try:
-                all_heroes = await _get_json(session, f"{OPENDOTA_BASE}/heroes")
+                all_heroes = await get_json(session, f"{OPENDOTA_BASE}/heroes")
             except Exception as e:
                 await interaction.followup.send(
                     f"Failed to fetch hero list: {e}", ephemeral=True
@@ -507,8 +470,8 @@ class DotaScout(commands.Cog):
 
             per_player_tasks = [
                 asyncio.gather(
-                    _get_json(session, f"{OPENDOTA_BASE}/players/{s32}"),
-                    _get_json(session, f"{OPENDOTA_BASE}/players/{s32}/heroes?date={days}"),
+                    get_json(session, f"{OPENDOTA_BASE}/players/{s32}"),
+                    get_json(session, f"{OPENDOTA_BASE}/players/{s32}/heroes?date={days}"),
                 )
                 for s32 in steam32_ids
             ]
@@ -589,8 +552,8 @@ class DotaScout(commands.Cog):
         async with aiohttp.ClientSession() as session:
             try:
                 match_data, all_heroes = await asyncio.gather(
-                    _get_json(session, f"{OPENDOTA_BASE}/matches/{mid}"),
-                    _get_json(session, f"{OPENDOTA_BASE}/heroes"),
+                    get_json(session, f"{OPENDOTA_BASE}/matches/{mid}"),
+                    get_json(session, f"{OPENDOTA_BASE}/heroes"),
                 )
             except aiohttp.ClientResponseError as e:
                 if e.status == 404:
@@ -623,8 +586,8 @@ class DotaScout(commands.Cog):
 
             per_player_tasks = [
                 asyncio.gather(
-                    _get_json(session, f"{OPENDOTA_BASE}/players/{s32}"),
-                    _get_json(session, f"{OPENDOTA_BASE}/players/{s32}/heroes?date={days}"),
+                    get_json(session, f"{OPENDOTA_BASE}/players/{s32}"),
+                    get_json(session, f"{OPENDOTA_BASE}/players/{s32}/heroes?date={days}"),
                 )
                 for s32 in steam32_ids
             ]
@@ -688,10 +651,10 @@ class DotaScout(commands.Cog):
         async with aiohttp.ClientSession() as session:
             try:
                 all_heroes, league_matches_raw, league_info, team_info = await asyncio.gather(
-                    _get_json(session, f"{OPENDOTA_BASE}/heroes"),
+                    get_json(session, f"{OPENDOTA_BASE}/heroes"),
                     _fetch_league_matches(session, league_id),
-                    _get_json(session, f"{OPENDOTA_BASE}/leagues/{league_id}"),
-                    _get_json(session, f"{OPENDOTA_BASE}/teams/{team_id}"),
+                    get_json(session, f"{OPENDOTA_BASE}/leagues/{league_id}"),
+                    get_json(session, f"{OPENDOTA_BASE}/teams/{team_id}"),
                 )
             except aiohttp.ClientResponseError as e:
                 if e.status == 404:
@@ -728,8 +691,8 @@ class DotaScout(commands.Cog):
 
             steam32_list = list(all_team_steam32s)
             all_player_results = await asyncio.gather(
-                *[_get_json(session, f"{OPENDOTA_BASE}/players/{s32}") for s32 in steam32_list],
-                *[_get_json(session, f"{OPENDOTA_BASE}/players/{s32}/heroes?date={days}") for s32 in steam32_list],
+                *[get_json(session, f"{OPENDOTA_BASE}/players/{s32}") for s32 in steam32_list],
+                *[get_json(session, f"{OPENDOTA_BASE}/players/{s32}/heroes?date={days}") for s32 in steam32_list],
                 return_exceptions=True,
             )
 
