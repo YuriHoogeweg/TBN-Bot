@@ -1,5 +1,5 @@
 from datetime import datetime
-from sqlalchemy import Boolean, Column, Date, DateTime, ForeignKey, Integer, create_engine, inspect, text
+from sqlalchemy import Boolean, Column, Date, DateTime, ForeignKey, Integer, String, create_engine, inspect, text
 from sqlalchemy.orm import declarative_base, Session
 from pathlib import Path
 
@@ -54,6 +54,23 @@ class JoinTime(Base):
     member_id = Column(Integer, primary_key=True)
     channel_id = Column(Integer)
     join_time = Column(DateTime)
+
+class ObsessedPlayer(Base):
+    __tablename__ = 'obsessed_player'
+
+    def __init__(self, discord_user_id: int, steam32_id: int, name: str, description: str):
+        self.discord_user_id = discord_user_id
+        self.steam32_id = steam32_id
+        self.name = name
+        self.description = description
+        self.created_at = datetime.now()
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    discord_user_id = Column(Integer, index=True)
+    steam32_id = Column(Integer)
+    name = Column(String)
+    description = Column(String)
+    created_at = Column(DateTime)
 
 def database_session() -> Session:
     engine = create_engine('sqlite:///' + database_path.as_posix())

@@ -1,5 +1,6 @@
 from cogs.anonymous import Anonymous
 from cogs.dota_scout import DotaScout
+from cogs.obsessed import ObsessedCog
 from cogs.worst_day import WorstDay
 from logger_config import setup_logging
 
@@ -45,6 +46,7 @@ bot.add_cog(NaughtyListCog(bot))
 bot.add_cog(Anonymous(bot))
 bot.add_cog(DotaScout(bot))
 bot.add_cog(WorstDay(bot))
+bot.add_cog(ObsessedCog(bot))
 
 # Register an event, the on_ready callback is fired when the bot has finished connecting.
 # See a complete list of supported events under https://docs.pycord.dev/en/master/api/events.html#discord.on_ready
