@@ -17,10 +17,10 @@ class Configuration:
             read_files = config.read('config.ini')
             if not read_files:
                 raise FileNotFoundError(
-                    f"devconfig.ini not found or unreadable. cwd={os.getcwd()} "
-                    f"exists={os.path.exists('devconfig.ini')} "
-                    f"isfile={os.path.isfile('devconfig.ini')} "
-                    f"isdir={os.path.isdir('devconfig.ini')}"
+                    f"config.ini not found or unreadable. cwd={os.getcwd()} "
+                    f"exists={os.path.exists('config.ini')} "
+                    f"isfile={os.path.isfile('config.ini')} "
+                    f"isdir={os.path.isdir('config.ini')}"
                 )
             cls._instance.GUILD_IDS = [int(x.strip()) for x in config['discord']['GUILD_IDS'].split(',')]
             cls._instance.CLIENT_ID = int(config['discord']['CLIENT_ID'])
