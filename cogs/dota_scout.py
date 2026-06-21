@@ -861,7 +861,7 @@ class DotaScout(commands.Cog):
         Parameters
         ----------
         team_id: OpenDota team ID (visible in the team's OpenDota/Dotabuff URL).
-        league_id: League/tournament ID. e.g. 19382 = Kobold Season 3
+        league_id: League/tournament ID. e.g. 19697 = Kobold Season 3
         date: How far back to look for the Recently Played section.
         """
         await self._scout_league_team_impl(interaction, team_id, league_id, date, ninja_mode)
@@ -882,4 +882,4 @@ class DotaScout(commands.Cog):
         team_id: OpenDota team ID (visible in the team's OpenDota/Dotabuff URL).
         date: How far back to look for the Recently Played section.
         """
-        await self._scout_league_team_impl(interaction, team_id, 19382, date, ninja_mode)
+        await self._scout_league_team_impl(interaction, team_id, 19697, date, ninja_mode)
