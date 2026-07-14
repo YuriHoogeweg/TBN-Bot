@@ -22,4 +22,6 @@ COPY . .
 
 RUN mkdir -p /app/resources /app/logs
 
-CMD ["python3", "-u", "main.py"]
+# yt-dlp needs the latest release to keep up with site changes (Instagram, etc.),
+# so refresh it on every container start (best-effort - don't block boot if PyPI is unreachable).
+CMD ["sh", "-c", "pip install --no-cache-dir --upgrade yt-dlp || true; exec python3 -u main.py"]
