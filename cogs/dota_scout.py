@@ -61,6 +61,13 @@ DATE_TO_DAYS = {
 }
 
 
+def _new_canvas(size: tuple[int, int], transparent: bool = False) -> Image.Image:
+    """Create a canvas: RGBA with a fully transparent background, or RGB filled with BG_COLOR."""
+    if transparent:
+        return Image.new("RGBA", size, (0, 0, 0, 0))
+    return Image.new("RGB", size, BG_COLOR)
+
+
 def _load_font(size: int) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
     try:
         return ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", size)
@@ -230,6 +237,7 @@ async def _build_draft_banner_canvas(
     own_picks: dict[int, int],
     opp_picks: dict[int, int],
     hero_lookup: dict,
+    transparent: bool = False,
 ) -> Image.Image:
     sections = [
         ("Their Bans", own_bans),
@@ -267,7 +275,7 @@ async def _build_draft_banner_canvas(
     total_w = BANNER_TOP_N * CARD_SLOT - CARD_GAP
     total_h = len(sections) * row_h + (len(sections) - 1) * ROW_GAP
 
-    canvas = Image.new("RGB", (total_w, total_h), BG_COLOR)
+    canvas = _new_canvas((total_w, total_h), transparent)
     draw = ImageDraw.Draw(canvas)
     label_font = _load_font(13)
     count_font = _load_font(FONT_SIZE)
@@ -294,11 +302,13 @@ async def _build_draft_banner_canvas(
     return canvas
 
 
-async def _build_scout_canvas(heroes: list[dict], player_name: str = None) -> Image.Image:
+async def _build_scout_canvas(
+    heroes: list[dict], player_name: str = None, transparent: bool = False
+) -> Image.Image:
     n = len(heroes)
     img_w = CARD_SLOT * n - 4  # no trailing gap on the last card
     header_h = NAME_ROW_H if player_name else 0
-    canvas = Image.new("RGB", (img_w, CARD_H + header_h), BG_COLOR)
+    canvas = _new_canvas((img_w, CARD_H + header_h), transparent)
     draw = ImageDraw.Draw(canvas)
     font = _load_font(FONT_SIZE)
 
@@ -329,8 +339,10 @@ async def _build_scout_canvas(heroes: list[dict], player_name: str = None) -> Im
     return canvas
 
 
-async def generate_scout_image(heroes: list[dict], player_name: str = None) -> BytesIO:
-    canvas = await _build_scout_canvas(heroes, player_name)
+async def generate_scout_image(
+    heroes: list[dict], player_name: str = None, transparent: bool = False
+) -> BytesIO:
+    canvas = await _build_scout_canvas(heroes, player_name, transparent)
     fp = BytesIO()
     canvas.save(fp, format="PNG")
     fp.seek(0)
@@ -350,13 +362,15 @@ class DotaScout(commands.Cog):
         player_id: str,
         date: str = commands.Param(default="3month", choices=["1week", "2week", "1month", "2month", "3month", "6month", "year"]),
         ninja_mode: bool = commands.Param(default=False, description="Only show the result to you"),
+        transparent: bool = commands.Param(default=False, description="Transparent background instead of dark grey"),
     ):
         """
         Scout a player's top 10 most played Dota 2 heroes.
         Parameters
         ----------
         player_id: Steam32 or Steam64 player ID (visible in your Dotabuff/OpenDota URL).
-        date: How far back to look — 1 week, 2 weeks, 1 month, 2 months, 3 months, 6 months, or 1 year.
+        date: How far back to look - 1 week, 2 weeks, 1 month, 2 months, 3 months, 6 months, or 1 year.
+        transparent: Render the image with a transparent background.
         """
         await interaction.response.defer(ephemeral=ninja_mode)
 
@@ -413,7 +427,7 @@ class DotaScout(commands.Cog):
             )
             return
 
-        image_fp = await generate_scout_image(heroes, player_name)
+        image_fp = await generate_scout_image(heroes, player_name, transparent)
         await interaction.followup.send(file=disnake.File(image_fp, filename="scout.png"), ephemeral=ninja_mode)
 
     @commands.slash_command(
@@ -429,6 +443,7 @@ class DotaScout(commands.Cog):
         player_id_5: str = None,
         date: str = commands.Param(default="3month", choices=["1week", "2week", "1month", "2month", "3month", "6month", "year"]),
         ninja_mode: bool = commands.Param(default=False, description="Only show the result to you"),
+        transparent: bool = commands.Param(default=False, description="Transparent background instead of dark grey"),
     ):
         """
         Scout up to 5 players' top 10 most played Dota 2 heroes.
@@ -439,7 +454,8 @@ class DotaScout(commands.Cog):
         player_id_3: Steam32 or Steam64 player ID (optional).
         player_id_4: Steam32 or Steam64 player ID (optional).
         player_id_5: Steam32 or Steam64 player ID (optional).
-        date: How far back to look — 1 week, 2 weeks, 1 month, 2 months, 3 months, 6 months, or 1 year.
+        date: How far back to look - 1 week, 2 weeks, 1 month, 2 months, 3 months, 6 months, or 1 year.
+        transparent: Render the image with a transparent background.
         """
         await interaction.response.defer(ephemeral=ninja_mode)
 
@@ -498,7 +514,7 @@ class DotaScout(commands.Cog):
                 errors.append(f"**{player_name}**: no hero data for this period")
                 continue
 
-            canvas = await _build_scout_canvas(heroes, player_name=player_name)
+            canvas = await _build_scout_canvas(heroes, player_name=player_name, transparent=transparent)
             canvases.append(canvas)
 
         if not canvases:
@@ -510,7 +526,7 @@ class DotaScout(commands.Cog):
 
         max_w = max(c.size[0] for c in canvases)
         total_h = sum(c.size[1] for c in canvases) + ROW_GAP * (len(canvases) - 1)
-        composite = Image.new("RGB", (max_w, total_h), BG_COLOR)
+        composite = _new_canvas((max_w, total_h), transparent)
         y = 0
         for canvas in canvases:
             composite.paste(canvas, (0, y))
@@ -533,13 +549,15 @@ class DotaScout(commands.Cog):
         side: str = commands.Param(choices=["radiant", "dire"]),
         date: str = commands.Param(default="3month", choices=["1week", "2week", "1month", "2month", "3month", "6month", "year"]),
         ninja_mode: bool = commands.Param(default=False, description="Only show the result to you"),
+        transparent: bool = commands.Param(default=False, description="Transparent background instead of dark grey"),
     ):
         """
         Parameters
         ----------
         match_id: Dota 2 match ID.
-        side: Which team to scout — Radiant or Dire.
-        date: How far back to look — 1 week, 2 weeks, 1 month, 2 months, 3 months, 6 months, or 1 year.
+        side: Which team to scout - Radiant or Dire.
+        date: How far back to look - 1 week, 2 weeks, 1 month, 2 months, 3 months, 6 months, or 1 year.
+        transparent: Render the image with a transparent background.
         """
         await interaction.response.defer(ephemeral=ninja_mode)
 
@@ -612,7 +630,7 @@ class DotaScout(commands.Cog):
                 errors.append(f"**{player_name}**: no hero data for this period")
                 continue
 
-            canvas = await _build_scout_canvas(heroes, player_name=player_name)
+            canvas = await _build_scout_canvas(heroes, player_name=player_name, transparent=transparent)
             canvases.append(canvas)
 
         if not canvases:
@@ -623,7 +641,7 @@ class DotaScout(commands.Cog):
 
         max_w = max(c.size[0] for c in canvases)
         total_h = sum(c.size[1] for c in canvases) + ROW_GAP * (len(canvases) - 1)
-        composite = Image.new("RGB", (max_w, total_h), BG_COLOR)
+        composite = _new_canvas((max_w, total_h), transparent)
         y = 0
         for canvas in canvases:
             composite.paste(canvas, (0, y))
@@ -643,6 +661,7 @@ class DotaScout(commands.Cog):
         league_id: int,
         date: str,
         ninja_mode: bool,
+        transparent: bool = False,
     ):
         await interaction.response.defer(ephemeral=ninja_mode)
 
@@ -744,7 +763,7 @@ class DotaScout(commands.Cog):
             heroes = _build_heroes_from_league_stats(player_stats, hero_lookup)
             if not heroes:
                 continue
-            canvas = await _build_scout_canvas(heroes, player_name=name_map.get(s32, str(s32)))
+            canvas = await _build_scout_canvas(heroes, player_name=name_map.get(s32, str(s32)), transparent=transparent)
             league_canvases.append(canvas)
 
         if not league_canvases:
@@ -761,10 +780,12 @@ class DotaScout(commands.Cog):
             heroes = _build_heroes(result, hero_lookup)
             if not heroes:
                 continue
-            canvas = await _build_scout_canvas(heroes, player_name=name_map.get(s32, str(s32)))
+            canvas = await _build_scout_canvas(heroes, player_name=name_map.get(s32, str(s32)), transparent=transparent)
             recent_canvases.append(canvas)
 
-        banner = await _build_draft_banner_canvas(own_bans, bans_against, own_picks, opp_picks, hero_lookup)
+        banner = await _build_draft_banner_canvas(
+            own_bans, bans_against, own_picks, opp_picks, hero_lookup, transparent
+        )
 
         # --- Composite ---
         def col_h(canvases):
@@ -799,7 +820,7 @@ class DotaScout(commands.Cog):
             + SECTION_TITLE_H + ROW_GAP + players_h
         )
 
-        composite = Image.new("RGB", (max_w, total_h), BG_COLOR)
+        composite = _new_canvas((max_w, total_h), transparent)
         draw = ImageDraw.Draw(composite)
 
         def draw_title(text, y, x=0, subtitle=None):
@@ -856,6 +877,7 @@ class DotaScout(commands.Cog):
         league_id: int,
         date: str = commands.Param(default="3month", choices=["1week", "2week", "1month", "2month", "3month", "6month", "year"]),
         ninja_mode: bool = commands.Param(default=False, description="Only show the result to you"),
+        transparent: bool = commands.Param(default=False, description="Transparent background instead of dark grey"),
     ):
         """
         Parameters
@@ -863,8 +885,9 @@ class DotaScout(commands.Cog):
         team_id: OpenDota team ID (visible in the team's OpenDota/Dotabuff URL).
         league_id: League/tournament ID. e.g. 19697 = Kobold Season 3
         date: How far back to look for the Recently Played section.
+        transparent: Render the image with a transparent background.
         """
-        await self._scout_league_team_impl(interaction, team_id, league_id, date, ninja_mode)
+        await self._scout_league_team_impl(interaction, team_id, league_id, date, ninja_mode, transparent)
 
     @commands.slash_command(
         description="Scout a Kobold Season 3 team's draft history and player hero pools.",
@@ -875,11 +898,13 @@ class DotaScout(commands.Cog):
         team_id: int,
         date: str = commands.Param(default="3month", choices=["1week", "2week", "1month", "2month", "3month", "6month", "year"]),
         ninja_mode: bool = commands.Param(default=False, description="Only show the result to you"),
+        transparent: bool = commands.Param(default=False, description="Transparent background instead of dark grey"),
     ):
         """
         Parameters
         ----------
         team_id: OpenDota team ID (visible in the team's OpenDota/Dotabuff URL).
         date: How far back to look for the Recently Played section.
+        transparent: Render the image with a transparent background.
         """
-        await self._scout_league_team_impl(interaction, team_id, 19697, date, ninja_mode)
+        await self._scout_league_team_impl(interaction, team_id, 19697, date, ninja_mode, transparent)
