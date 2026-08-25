@@ -11,7 +11,6 @@ from disnake.ext.commands import InteractionBot
 from cogs.corybot import CoryBot
 from cogs.birthdays import Birthdays
 from cogs.sandbot import SandBot
-from cogs.formulaone import FormulaOne
 from cogs.jointime import JoinTimeCog
 from cogs.naughtylist import NaughtyListCog
 from cogs.embedvideo import EmbedVideo
@@ -39,7 +38,6 @@ bot.add_cog(cory_bot)
 
 bot.add_cog(StreamAnnouncer(bot, [sand_bot, cory_bot]))
 bot.add_cog(Birthdays(bot))
-bot.add_cog(FormulaOne(bot))
 bot.add_cog(JoinTimeCog(bot))
 bot.add_cog(EmbedVideo(bot))
 bot.add_cog(NaughtyListCog(bot))
