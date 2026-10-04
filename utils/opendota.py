@@ -35,14 +35,28 @@ def get_limiter() -> RateLimiter:
     return _OPENDOTA_LIMITER
 
 
+class OpenDotaResponseError(aiohttp.ClientResponseError):
+    """ClientResponseError whose str/repr omit the request URL, which carries the API key."""
+    def __str__(self) -> str:
+        return f"{self.status}, message={self.message!r}"
+
+    def __repr__(self) -> str:
+        return f"{type(self).__name__}(status={self.status!r}, message={self.message!r})"
+
+
 async def get_json(session: aiohttp.ClientSession, url: str) -> list | dict:
     key = Configuration.instance().OPENDOTA_KEY
-    if key:
-        sep = "&" if "?" in url else "?"
-        url = f"{url}{sep}api_key={key}"
+    params = {"api_key": key} if key else None
     async with get_limiter():
-        async with session.get(url, timeout=aiohttp.ClientTimeout(total=15)) as resp:
-            resp.raise_for_status()
+        async with session.get(url, params=params, timeout=aiohttp.ClientTimeout(total=15)) as resp:
+            if resp.status >= 400:
+                raise OpenDotaResponseError(
+                    resp.request_info,
+                    resp.history,
+                    status=resp.status,
+                    message=resp.reason or "",
+                    headers=resp.headers,
+                )
             return await resp.json()
 
 

@@ -883,14 +883,14 @@ class DotaScout(commands.Cog):
         Parameters
         ----------
         team_id: OpenDota team ID (visible in the team's OpenDota/Dotabuff URL).
-        league_id: League/tournament ID. e.g. 19697 = Kobold Season 3
+        league_id: League/tournament ID. e.g. 20258 = latest Kobold season
         date: How far back to look for the Recently Played section.
         transparent: Render the image with a transparent background.
         """
         await self._scout_league_team_impl(interaction, team_id, league_id, date, ninja_mode, transparent)
 
     @commands.slash_command(
-        description="Scout a Kobold Season 3 team's draft history and player hero pools.",
+        description="Scout a current Kobold season team's draft history and player hero pools.",
     )
     async def scout_kobold_team(
         self,
@@ -907,4 +907,4 @@ class DotaScout(commands.Cog):
         date: How far back to look for the Recently Played section.
         transparent: Render the image with a transparent background.
         """
-        await self._scout_league_team_impl(interaction, team_id, 19697, date, ninja_mode, transparent)
+        await self._scout_league_team_impl(interaction, team_id, 20258, date, ninja_mode, transparent)
